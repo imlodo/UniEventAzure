@@ -9,7 +9,7 @@
       "methods": [
         "post"
       ],
-      "route": "token/generateToken"
+      "route": "token/verifyToken"
     },
     {
       "type": "http",

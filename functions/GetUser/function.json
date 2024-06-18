@@ -9,7 +9,7 @@
       "methods": [
         "get"
       ],
-      "route": "getUser"
+      "route": "user/getUser"
     },
     {
       "type": "http",
