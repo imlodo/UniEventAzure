@@ -3,16 +3,17 @@ import os
 import pymongo
 import jwt
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
 from werkzeug.security import check_password_hash
-import json  # Importa il modulo json per la serializzazione
+import json
 
-# Connessione al cluster di Azure Cosmos DB for MongoDB
-connectString = ("mongodb://unieventcosmosdb"
-                 ":a1MoJYXGpXTf2Rgz1KoFFrMnlxLSEnyZmQ5f5WhQeXt1B99VN1LkKmllq2sIN4ueFA0ZevjRhQjZACDbwgZgDA"
-                 "==@unieventcosmosdb.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb"
-                 "&maxIdleTimeMS=120000&appName=@unieventcosmosdb@")
+# Carica le variabili di ambiente dal file .env
+load_dotenv()
+
+# Ottieni la stringa di connessione dal file delle variabili d'ambiente
+connectString = os.getenv("DB_CONNECTION_STRING")
 
 client = MongoClient(connectString)
 
@@ -39,7 +40,7 @@ def verify_user(t_username, password):
 # Funzione per generare un token JWT
 def generate_jwt_token(user):
     # Configura la chiave segreta (da mantenere in un ambiente sicuro)
-    secret_key = os.environ.get('JWT_SECRET_KEY', '96883c431142be979c69509655c4eca623a34714f948206b0cfbed0e986b173e')
+    secret_key = os.getenv('JWT_SECRET_KEY')
 
     # Scadenza del token (2 ore)
     expiration = datetime.utcnow() + timedelta(minutes=120)
@@ -54,7 +55,7 @@ def generate_jwt_token(user):
     # Genera il token JWT
     token = jwt.encode(payload, secret_key, algorithm='HS256')
 
-    return token # Decodifica il token in una stringa
+    return token  # Decodifica il token in una stringa
 
 
 # Funzione principale dell'Azure Function
@@ -84,14 +85,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Verifica le credenziali dell'utente nel database
-            user = verify_user(t_username, t_password)
+            # user = verify_user(t_username, t_password)
+
+            # Mock user per scopi di esempio
+            user = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
+                        t_surname="Doe",
+                        t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
+                        t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg", is_verified=True,
+                        t_type="CREATOR")
 
             if user:
                 # Genera il token JWT
                 jwt_token = generate_jwt_token(user)
 
                 # Costruisci il corpo della risposta come una stringa JSON
-                response_body = json.dumps({ "token": jwt_token })
+                response_body = json.dumps({"token": jwt_token})
 
                 # Restituisci il token JWT come parte della risposta
                 return func.HttpResponse(

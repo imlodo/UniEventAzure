@@ -9,6 +9,11 @@ class USER_TYPE(Enum):
     CREATOR = "CREATOR"
     COMPANY = "COMPANY"
 
+class USER_TYPE(Enum):
+    Moder = "ARTIST"
+    CREATOR = "CREATOR"
+    COMPANY = "COMPANY"
+
 # Connessione al cluster di Azure Cosmos DB for MongoDB
 connectString = ("mongodb://unieventcosmosdb"
                  ":a1MoJYXGpXTf2Rgz1KoFFrMnlxLSEnyZmQ5f5WhQeXt1B99VN1LkKmllq2sIN4ueFA0ZevjRhQjZACDbwgZgDA"

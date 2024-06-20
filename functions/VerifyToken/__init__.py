@@ -2,6 +2,7 @@ import logging
 import os
 import jwt
 import azure.functions as func
+import json  # Importa il modulo json per gestire il formato JSON
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -21,14 +22,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             jwt_token = auth_header.split(' ')[1]
-            secret_key = os.environ.get('JWT_SECRET_KEY',
-                                        '96883c431142be979c69509655c4eca623a34714f948206b0cfbed0e986b173e')
+            secret_key = os.getenv('JWT_SECRET_KEY')
 
             try:
                 jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
+                response_data = { "message": "Token valido." }  # Crea un oggetto JSON con il messaggio
                 return func.HttpResponse(
-                    "Token valido.",
-                    status_code=200
+                    body=json.dumps(response_data),  # Converte l'oggetto JSON in una stringa JSON
+                    status_code=200,
+                    headers={ "Content-Type": "application/json" }  # Specifica il Content-Type come application/json
                 )
             except jwt.ExpiredSignatureError:
                 return func.HttpResponse(
