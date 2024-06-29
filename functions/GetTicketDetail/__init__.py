@@ -68,19 +68,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "TABLE": {
                         "DISCOTECA": True,
                         "DISCOTECA_DJ": False
-                    },
-                    "SEAT": {
-                        "TYPE": {
-                            "NO_CONSUMATION": True,
-                            "WITH_CONSUMATION": False
-                        }
                     }
                 },
                 "price": "50.00",
                 "event": {
                     "t_title": "Summer Music Festival",
                     "t_event_date": "15/07/2023",
-                    "t_image_link": "https://example.com/image.jpg"
+                    "t_image_link": "/assets/img/event-image-placeholder.jpg"
                 }
             }
             # ticket_detail = {
