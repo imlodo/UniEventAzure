@@ -18,8 +18,9 @@ client = MongoClient(connectString)
 # Seleziona il database
 db = client.unieventmongodb
 
-# Seleziona la collezione per i messaggi
+# Seleziona la collezione per i messaggi e gli utenti
 messages_collection = db.Messages
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -49,32 +50,34 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not username:
             return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
-        # # Recupera i messaggi dal database
+        # Recupera i messaggi dal database
         # messages = messages_collection.find(
-        #     {"$or": [{"user_at.t_username": username}, {"user_from.t_username": username}]}
+        #     {"$or": [{"user_at": username}, {"user_from": username}]}
         # )
         # 
         # # Creazione di un dizionario per tracciare gli utenti unici e l'ultimo messaggio
         # unique_users = {}
         # for message in messages:
-        #     if message["user_at"]["t_username"] != username:
-        #         user = message["user_at"]
-        #     else:
-        #         user = message["user_from"]
+        #     # Recupera i dettagli dell'utente dal database degli utenti
+        #     user_at = users_collection.find_one({"username": message["user_at"]})
+        #     user_from = users_collection.find_one({"username": message["user_from"]})
         # 
-        #     user_key = user["t_alias_generated"]
+        #     if not user_at or not user_from:
+        #         continue
+        # 
+        #     user_key = user_at["alias_generated"] if user_at["username"] != username else user_from["alias_generated"]
         #     if user_key not in unique_users:
         #         unique_users[user_key] = {
         #             "userChat": {
-        #                 "t_name": user["t_name"],
-        #                 "t_surname": user["t_surname"],
-        #                 "t_alias_generated": user["t_alias_generated"],
-        #                 "t_profile_photo": user["t_profile_photo"],
-        #                 "t_type": user["t_type"]
+        #                 "t_name": user_at["name"] if user_at["username"] != username else user_from["name"],
+        #                 "t_surname": user_at["surname"] if user_at["username"] != username else user_from["surname"],
+        #                 "t_alias_generated": user_key,
+        #                 "t_profile_photo": user_at.get("profile_photo") if user_at["username"] != username else user_from.get("profile_photo"),
+        #                 "t_type": user_at["type"] if user_at["username"] != username else user_from["type"]
         #             },
         #             "messages": [{
-        #                 "user_at": message["user_at"],
-        #                 "user_from": message["user_from"],
+        #                 "user_at": user_at,
+        #                 "user_from": user_from,
         #                 "message": message["message"],
         #                 "dateTime": message["dateTime"]
         #             }]
@@ -83,8 +86,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         #         # Aggiorna con l'ultimo messaggio se è più recente
         #         if message["dateTime"] > unique_users[user_key]["messages"][0]["dateTime"]:
         #             unique_users[user_key]["messages"][0] = {
-        #                 "user_at": message["user_at"],
-        #                 "user_from": message["user_from"],
+        #                 "user_at": user_at,
+        #                 "user_from": user_from,
         #                 "message": message["message"],
         #                 "dateTime": message["dateTime"]
         #             }
@@ -384,7 +387,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 ]
             }
         ]
-
         # Ordinamento della lista in base agli ultimi utenti scritti
         user_list = sorted(user_list, key=lambda x: x["messages"][0]["dateTime"], reverse=True)
 

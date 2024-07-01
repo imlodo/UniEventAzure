@@ -18,8 +18,9 @@ client = MongoClient(connectString)
 # Seleziona il database
 db = client.unieventmongodb
 
-# Seleziona la collezione per i messaggi
+# Seleziona la collezione per i messaggi e gli utenti
 messages_collection = db.Messages
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -57,20 +58,27 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Recupera i messaggi dal database per l'utente corrente e l'utente target
         # messages = messages_collection.find(
         #     {"$or": [
-        #         {"$and": [{"user_to.t_username": username}, {"user_at.t_alias_generated": target_alias}]},
-        #         {"$and": [{"user_at.t_username": username}, {"user_to.t_alias_generated": target_alias}]}
+        #         {"$and": [{"user_to": username}, {"user_at": target_alias}]},
+        #         {"$and": [{"user_at": username}, {"user_to": target_alias}]}
         #     ]}
         # ).sort("dateTime", -1)
         # 
         # # Creazione della lista dei messaggi
         # messages_list = []
         # for message in messages:
+        #     user_to = users_collection.find_one({"username": message["user_to"]})
+        #     user_at = users_collection.find_one({"username": message["user_at"]})
+        # 
+        #     if not user_to or not user_at:
+        #         continue
+        # 
         #     messages_list.append({
-        #         "user_to": message["user_to"],
-        #         "user_at": message["user_at"],
+        #         "user_to": user_to,
+        #         "user_at": user_at,
         #         "message": message["message"],
         #         "dateTime": message["dateTime"]
         #     })
+
         messages_list = [
             {
                 "user_from": {

@@ -1,0 +1,22 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "type": "webPubSubConnection",
+      "name": "connection",
+      "hub": "unievent",
+      "direction": "in",
+      "connection": "AzureWebPubSubConnectionString"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "type": "webPubSubTrigger",
+      "direction": "in",
+      "name": "request",
+      "hub": "unievent",
+      "eventName": "message",
+      "eventType": "user"
+    },
+    {
+      "type": "webPubSub",
+      "name": "actions",
+      "hub": "unievent",
+      "direction": "out",
+      "connection": "AzureWebPubSubConnectionString"
+    }
+  ]
+}
