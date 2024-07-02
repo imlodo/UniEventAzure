@@ -33,6 +33,24 @@ def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order
     if t_alias_generated:
         query["t_user.t_alias_generated"] = t_alias_generated
 
+    match t_more_content_type:
+        case "PROFILE_CONTENT":
+            return
+        case "PROFILE_BOOKED":
+            return
+        case "PROFILE_LIKED":
+            return
+        case "EXPLORE_FEATURED":
+            return
+        case "EXPLORE_FOLLOWED":
+            return
+        case "EXPLORE_EVENTS":
+            return
+        case "EXPLORE_TOPICS":
+            return
+        case "EXPLORE_ALL":
+            return
+
     if t_more_content_type:
         query["type"] = t_more_content_type
 
@@ -138,12 +156,30 @@ def generate_random_topics(index):
 # Funzione per generare contenuti casuali in base al tipo
 def load_more_items(content_type, count):
     items = []
-    for index in range(count):
-        if content_type == "Eventi":
+    contentType = "ALL"
+    match content_type:
+        case "PROFILE_CONTENT" | "PROFILE_BOOKED" | "PROFILE_LIKED" | "EXPLORE_FEATURED" | "EXPLORE_ALL":
+            contentType = "ALL"
+        case "EXPLORE_EVENTS":
+            contentType = "EVENTS"
+        case "EXPLORE_TOPICS":
+            contentType = "TOPICS"
+
+    if contentType == "ALL":
+        for index in range(count):
+            if random.random() > 0.5:
+                items.append(generate_random_event(index))
+            else:
+                items.append(generate_random_topics(index))
+        return items
+    elif contentType == "EVENTS":
+        for index in range(count):
             items.append(generate_random_event(index))
-        else:
+        return items
+    elif contentType == "TOPICS":
+        for index in range(count):
             items.append(generate_random_topics(index))
-    return items
+        return items
 
 
 # Funzione principale dell'Azure Function
