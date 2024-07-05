@@ -7,3 +7,4 @@ pymongo~=4.7.3
 PyJWT~=2.8.0
 Werkzeug~=3.0.3
 python-dotenv~=1.0.1
+sendgrid
