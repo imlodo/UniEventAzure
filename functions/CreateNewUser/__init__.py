@@ -63,7 +63,8 @@ def add_user(data):
         "t_surname": data.get('t_surname'),
         "t_alias_generated": alias,
         "is_verified": data.get('is_verified', False),  # Rendere obbligatorio
-        "t_type": data['t_type']
+        "t_type": data['t_type'],
+        "t_role": data['t_role']
     }
     try:
         users_collection.insert_one(user)

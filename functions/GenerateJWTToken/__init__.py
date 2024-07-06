@@ -43,7 +43,7 @@ def generate_jwt_token(user):
     secret_key = os.getenv('JWT_SECRET_KEY')
 
     # Scadenza del token (2 ore)
-    expiration = datetime.utcnow() + timedelta(minutes=120)
+    expiration = datetime.utcnow() + timedelta(minutes=1440)
 
     # Creazione del payload del token
     payload = {
