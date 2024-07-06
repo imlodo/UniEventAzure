@@ -1,5 +1,7 @@
 import logging
 import os
+from enum import Enum
+
 import pymongo
 import jwt
 from datetime import datetime, timedelta
@@ -102,6 +104,12 @@ user = {
 }
 
 
+class USER_TYPE(Enum):
+    ARTIST = "ARTIST"
+    CREATOR = "CREATOR"
+    COMPANY = "COMPANY"
+
+
 # Funzione per generare un numero casuale tra un intervallo
 def random_int_from_interval(min_val, max_val):
     return random.randint(min_val, max_val)
@@ -153,17 +161,36 @@ def generate_random_topics(index):
     }
 
 
+def generate_random_account(index, user_type):
+    randomNumber = random_int_from_interval(1, 3)
+    randomAccountType = USER_TYPE.ARTIST if user_type == "Artist" else USER_TYPE.CREATOR if randomNumber == 2 else USER_TYPE.COMPANY
+    return {
+        "id": index,
+        "t_name": "Name" + str(index + 1),
+        "t_follower_number": random_int_from_interval(100, 10000),
+        "t_alias_generated": "alias" + str(index + 1),
+        "t_description": "Ti aiutiamo a diventare la versione migliore di TE STESSO! Seguici su Instagram.",
+        "t_profile_photo": '/assets/img/example_artist_image.jpg' if randomAccountType == USER_TYPE.ARTIST else "/assets/img/userExampleImg.jpeg",
+        "t_type": randomAccountType.value,
+        "is_verified": True if random_int_from_interval(0, 5) > 3 and randomAccountType == USER_TYPE.ARTIST else False,
+    }
+
+
 # Funzione per generare contenuti casuali in base al tipo
 def load_more_items(content_type, count):
     items = []
     contentType = "ALL"
     match content_type:
-        case "PROFILE_CONTENT" | "PROFILE_BOOKED" | "PROFILE_LIKED" | "EXPLORE_FEATURED" | "EXPLORE_ALL":
+        case "PROFILE_CONTENT" | "PROFILE_BOOKED" | "PROFILE_LIKED" | "EXPLORE_FEATURED" | "EXPLORE_ALL" | "SEARCH_ALL":
             contentType = "ALL"
-        case "EXPLORE_EVENTS":
+        case "EXPLORE_EVENTS" | "SEARCH_EVENTS":
             contentType = "EVENTS"
-        case "EXPLORE_TOPICS":
+        case "EXPLORE_TOPICS" | "SEARCH_TOPICS":
             contentType = "TOPICS"
+        case "SEARCH_ARTIST":
+            contentType = "ARTISTS"
+        case "SEARCH_USER":
+            contentType = "USERS"
 
     if contentType == "ALL":
         for index in range(count):
@@ -179,6 +206,14 @@ def load_more_items(content_type, count):
     elif contentType == "TOPICS":
         for index in range(count):
             items.append(generate_random_topics(index))
+        return items
+    elif contentType == "USERS":
+        for index in range(count):
+            items.append(generate_random_account(index, "USER"))
+        return items
+    elif contentType == "ARTISTS":
+        for index in range(count):
+            items.append(generate_random_account(index, "Artist"))
         return items
 
 
