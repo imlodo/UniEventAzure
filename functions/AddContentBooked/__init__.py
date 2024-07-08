@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from enum import Enum
+from random import random
 
 import pymongo
 from pymongo import MongoClient
@@ -106,7 +107,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # if existing_record:
         #     content_booked_collection.delete_one({"content_id": content_id, "t_username": t_username})
         #     return func.HttpResponse(
-        #         body=json.dumps({"message": "Contenuto rimosso dai preferiti"}),
+        #         body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
         #         status_code=201,
         #         mimetype='application/json'
         #     )
@@ -119,9 +120,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
 
         #content_booked_collection.insert_one(new_record)
-
+        # return func.HttpResponse(
+        #     body=json.dumps({"booked": True, "message": "Contenuto aggiunto ai preferiti"}),
+        #     status_code=201,
+        #     mimetype='application/json'
+        # )
+        if random() > 0.5:
+            return func.HttpResponse(
+                body=json.dumps({"booked": True, "message": "Contenuto aggiunto ai preferiti"}),
+                status_code=201,
+                mimetype='application/json'
+            )
         return func.HttpResponse(
-            body=json.dumps({"message": "Contenuto aggiunto ai preferiti"}),
+            body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
             status_code=201,
             mimetype='application/json'
         )

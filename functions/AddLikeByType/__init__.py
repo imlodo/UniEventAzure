@@ -2,12 +2,11 @@ import json
 import logging
 import os
 from enum import Enum
+from random import random
 
-import pymongo
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
-from functools import wraps
 from datetime import datetime
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
@@ -21,8 +20,8 @@ db = client.unieventmongodb
 # Seleziona la collezione USERS
 users_collection = db.User
 
-# Seleziona la collezione CONTENT_BOOKED
-content_booked_collection = db.CONTENT_BOOKED
+content_like_collection = db.CONTENT_LIKE
+discussion_like_collection = db.DISCUSSION_LIKE
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -84,15 +83,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         req_body = req.get_json()
         t_alias_generated = req_body.get('t_alias_generated')
         content_id = req_body.get('content_id')
+        discussion_id = req_body.get('discussion_id')
+        like_type = req_body.get('like_type')
 
-        if not t_alias_generated or not content_id:
+        if not t_alias_generated:
             return func.HttpResponse(
-                "I parametri t_alias_generated e content_id sono obbligatori.",
+                "Il parametro t_alias_generated è obbligatorio.",
                 status_code=400
             )
 
         # Recupera l'utente dal t_alias_generated
-        #user = users_collection.find_one({"t_alias_generated": t_alias_generated})
+        # user = users_collection.find_one({"t_alias_generated": t_alias_generated})
 
         # if not user:
         #     return func.HttpResponse(
@@ -100,31 +101,91 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         #         status_code=404
         #     )
 
-        t_username = "baldi"  #user.get('username')
+        t_username = "baldi"  # user.get('username')
 
-        # Controlla se esiste già un record con lo stesso content_id e t_username
-        # existing_record = content_booked_collection.find_one({"content_id": content_id, "t_username": t_username})
-        # 
-        # if existing_record:
-        #     return func.HttpResponse(
-        #         "Il contenuto è già stato prenotato da questo utente.",
-        #         status_code=409
-        #     )
+        if like_type == "LIKE_CONTENT":
+            if not content_id:
+                return func.HttpResponse(
+                    "Il parametro content_id è obbligatorio.",
+                    status_code=400
+                )
+            # existing_record = content_like_collection.find_one({"content_id": content_id, "t_username": t_username})
+            # if existing_record:
+            #     content_like_collection.delete_one({"content_id": content_id, "t_username": t_username})
+            #     return func.HttpResponse(
+            #         body=json.dumps({"liked": False,"message": "Contenuto rimosso dai piaciuti"}),
+            #         status_code=201,
+            #         mimetype='application/json'
+            #     )
+            # # Crea un nuovo record nella tabella CONTENT_BOOKED
+            # new_record = {
+            #     "content_id": content_id,
+            #     "t_username": t_username,
+            #     "created_at": datetime.utcnow()
+            # }
+            # 
+            # content_like_collection.insert_one(new_record)
+            # return func.HttpResponse(
+            #     body=json.dumps({"liked": True, "message": "Contenuto aggiunto ai piaciuti"}),
+            #     status_code=201,
+            #     mimetype='application/json'
+            # )
+            if random() > 0.5:
+                return func.HttpResponse(
+                    body=json.dumps({"liked": True, "message": "Contenuto aggiunto ai piaciuti"}),
+                    status_code=201,
+                    mimetype='application/json'
+                )
+            return func.HttpResponse(
+                body=json.dumps({"liked": False, "message": "Contenuto rimosso dai piaciuti"}),
+                status_code=201,
+                mimetype='application/json'
+            )
 
-        # Crea un nuovo record nella tabella CONTENT_BOOKED
-        new_record = {
-            "content_id": content_id,
-            "t_username": t_username,
-            "created_at": datetime.utcnow()
-        }
+        elif like_type == "LIKE_DISCUSSION":
+            if not discussion_id:
+                return func.HttpResponse(
+                    "Il parametro discussion_id è obbligatorio.",
+                    status_code=400
+                )
+            # existing_record = discussion_like_collection.find_one({"discussion_id": discussion_id, "t_username": t_username})
+            # if existing_record:
+            #     discussion_like_collection.delete_one({"discussion_id": discussion_id, "t_username": t_username})
+            #     return func.HttpResponse(
+            #         body=json.dumps({"liked": False,"message": "Commento rimosso dai piaciuti"}),
+            #         status_code=201,
+            #         mimetype='application/json'
+            #     )
+            # # Crea un nuovo record nella tabella CONTENT_BOOKED
+            # new_record = {
+            #     "discussion_id": discussion_id,
+            #     "t_username": t_username,
+            #     "created_at": datetime.utcnow()
+            # }
+            # 
+            # discussion_like_collection.insert_one(new_record)
+            # return func.HttpResponse(
+            #     body=json.dumps({"liked": True, "message": "Commento aggiunto ai piaciuti"}),
+            #     status_code=201,
+            #     mimetype='application/json'
+            # )
+            if random() > 0.5:
+                return func.HttpResponse(
+                    body=json.dumps({"liked": True, "message": "Commento aggiunto ai piaciuti"}),
+                    status_code=201,
+                    mimetype='application/json'
+                )
+            return func.HttpResponse(
+                body=json.dumps({"liked": False, "message": "Commento rimosso dai piaciuti"}),
+                status_code=201,
+                mimetype='application/json'
+            )
 
-        content_booked_collection.insert_one(new_record)
-
-        return func.HttpResponse(
-            body=json.dumps({"message": "Record aggiunto con successo."}),
-            status_code=201,
-            mimetype='application/json'
-        )
+        else:
+            return func.HttpResponse(
+                "Il tipo di like è errato.",
+                status_code=400
+            )
 
     except ValueError as ve:
         logging.error(f"Errore: {ve}")

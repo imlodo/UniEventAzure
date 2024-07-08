@@ -6,8 +6,10 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["post"],
-      "route": "content/addLikeByType"
+      "methods": [
+        "post"
+      ],
+      "route": "content/checkContentIsBookedByCurrentUser"
     },
     {
       "type": "http",
