@@ -143,12 +143,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         elif like_type == "LIKE_DISCUSSION":
-            if not discussion_id:
+            if not discussion_id or not content_id:
                 return func.HttpResponse(
-                    "Il parametro discussion_id è obbligatorio.",
+                    "I parametri discussion_id e content_id sono obbligatori.",
                     status_code=400
                 )
-            # existing_record = discussion_like_collection.find_one({"discussion_id": discussion_id, "t_username": t_username})
+            # existing_record = discussion_like_collection.find_one({"content_id": content_id, "discussion_id": discussion_id, "t_username": t_username})
             # if existing_record:
             #     discussion_like_collection.delete_one({"discussion_id": discussion_id, "t_username": t_username})
             #     return func.HttpResponse(
@@ -158,6 +158,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     )
             # # Crea un nuovo record nella tabella CONTENT_BOOKED
             # new_record = {
+            #     "content_id": content_id,
             #     "discussion_id": discussion_id,
             #     "t_username": t_username,
             #     "created_at": datetime.utcnow()

@@ -115,7 +115,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "t_topic_date": "2024-07-07T15:34:10.526Z",
                 "t_alias_generated": t_alias_generated,
                 "n_click": 6720272,
-                "type": "Topics",
+                "type": "Topics" if random.random() > 0.5 else "Eventi",
                 "created_date": "2024-06-15T15:34:10.527Z"
             }
             if not content:

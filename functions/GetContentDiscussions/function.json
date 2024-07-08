@@ -1,5 +1,4 @@
 {
-  "scriptFile": "__init__.py",
   "bindings": [
     {
       "authLevel": "function",
@@ -7,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["get"],
-      "route": "content/getCountByType"
+      "route": "content/getContentDiscussions"
     },
     {
       "type": "http",
