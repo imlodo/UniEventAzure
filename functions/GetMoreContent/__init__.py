@@ -3,7 +3,6 @@ import os
 from enum import Enum
 
 import pymongo
-import jwt
 from datetime import datetime, timedelta
 from azure.functions import HttpResponse
 from pymongo import MongoClient
@@ -19,16 +18,45 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 content_collection = db.Content
+# Seleziona la collezione USERS
+users_collection = db.User
+# Seleziona la collezione CONTENT_BOOKED
+content_like_collection = db.CONTENT_LIKE
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
 
+def count_records(countType, params):
+    if 'content_id' not in params:
+        raise ValueError("Il parametro content_id è obbligatorio.")
+    else:
+        filter_params = {
+            'content_id': str(params['content_id']),
+        }
+
+    if countType == 'Booked':
+        collection = db.CONTENT_BOOKED
+        count = collection.count_documents(filter_params)
+
+    elif countType == 'Discussion':
+        collection = db.CONTENT_DISCUSSION
+        count = collection.count_documents(filter_params)
+
+    elif countType == 'Like':
+        collection = db.CONTENT_LIKE
+        count = collection.count_documents(filter_params)
+
+    else:
+        raise ValueError(f"countType '{countType}' non valido.")
+
+    return count
+
 # Funzione per ottenere i contenuti in base ai parametri forniti (VA ADATTATA AI VARI T_MORE_CONTENT_TYPE)
 def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order_by, order_direction, pageNumber,
                      pageSize):
     query = {}
-
+    user = users_collection.find_one({"t_alias_generated": t_alias_generated})
     if t_search_str:
         query["t_caption"] = {"$regex": t_search_str, "$options": "i"}
 
@@ -63,6 +91,18 @@ def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order
 
     content_list = []
     for content in contents:
+        is_liked_by_current_user = False
+        if user:
+            liked_record = content_like_collection.find_one({"content_id": content["_id"], "t_username": user.get('t_username')})
+            if liked_record:
+                is_liked_by_current_user = True
+        numOfComment = count_records("Discussion", {"content_id": content["_id"]})
+        numOfLike = count_records("Like", {"content_id": content["_id"]})
+        numOfBooked = count_records("Booked", {"content_id": content["_id"]})
+        content["numOfComment"] = numOfComment
+        content["numOfLike"] = numOfLike
+        content["numOfBooked"] = numOfBooked
+        content["is_liked_by_current_user"] = is_liked_by_current_user
         if '_id' in content:
             del content['_id']
         content_list.append(content)
@@ -141,7 +181,11 @@ def generate_random_event(index):
         "type": "Eventi",
         "created_date": generate_random_date().isoformat(),
         "event_first_date": generate_random_next_today_date().isoformat(),
-        "event_last_date": generate_random_next_today_date().isoformat()
+        "event_last_date": generate_random_next_today_date().isoformat(),
+        "numOfComment": random.randint(1, 10000),
+        "numOfLike": random.randint(1, 10000),
+        "numOfBooked": random.randint(1, 10000),
+        "is_liked_by_current_user": True if random.randint(0,1) else False
     }
 
 
@@ -157,7 +201,11 @@ def generate_random_topics(index):
         "t_user": user,
         "n_click": random_int_from_interval(1, 10000000),
         "type": "Topics",
-        "created_date": generate_random_date().isoformat()
+        "created_date": generate_random_date().isoformat(),
+        "numOfComment": random.randint(1, 10000),
+        "numOfLike": random.randint(1, 10000),
+        "numOfBooked": random.randint(1, 10000),
+        "is_liked_by_current_user": True if random.randint(0,1) else False
     }
 
 
@@ -224,7 +272,6 @@ def main(req: func.HttpRequest) -> HttpResponse:
     if req.method == 'POST':
         try:
             req_body = req.get_json()
-
             t_search_str = req_body.get('t_search_str', '')
             t_alias_generated = req_body.get('t_alias_generated', '')
             t_more_content_type = req_body.get('t_more_content_type')
