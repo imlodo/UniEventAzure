@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import random
 
 import jwt
 from bson import ObjectId
@@ -29,10 +30,11 @@ def get_followed_users(t_username, limit=None):
 
     user_list = []
     for user in users:
+        t_follower_number = follow_user_collection.count_documents(
+            {"t_alias_generated_to": user.get("t_alias_generated", "null")})
         user_dict = {
             "_id": str(user["_id"]),
             "t_username": user.get("t_username", ""),
-            "t_password": user.get("t_password", ""),
             "t_name": user.get("t_name", ""),
             "t_surname": user.get("t_surname", ""),
             "t_alias_generated": user.get("t_alias_generated", ""),
@@ -40,7 +42,8 @@ def get_followed_users(t_username, limit=None):
             "t_profile_photo": user.get("t_profile_photo", ""),
             "is_verified": user.get("is_verified", False),
             "t_type": user.get("t_type", ""),
-            "t_role": "Utente"
+            "t_role": "Utente",
+            "t_follower_number": t_follower_number
         }
         user_list.append(user_dict)
 
@@ -105,7 +108,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "USER_TYPE",
-                    "t_role": "Utente"
+                    "t_role": "Utente",
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d2",
@@ -118,7 +122,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "USER_TYPE",
-                    "t_role": "Utente"
+                    "t_role": "Utente",
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d3",
@@ -131,7 +136,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente",
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d4",
@@ -144,7 +150,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente",
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d5",
@@ -157,7 +164,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d6",
@@ -170,7 +178,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d7",
@@ -183,7 +192,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d8",
@@ -196,7 +206,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4d9",
@@ -209,7 +220,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4da",
@@ -222,7 +234,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4db",
@@ -235,7 +248,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4dc",
@@ -248,7 +262,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4dd",
@@ -261,7 +276,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4de",
@@ -274,7 +290,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4df",
@@ -287,7 +304,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4e0",
@@ -300,7 +318,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4e1",
@@ -313,7 +332,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4e2",
@@ -326,7 +346,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": False,
                     "t_type": "CREATOR",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4e3",
@@ -339,7 +360,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 },
                 {
                     "_id": "60b8d295f8ba2b1b78b5a4e4",
@@ -352,7 +374,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
                     "is_verified": True,
                     "t_type": "ARTIST",
-                    "t_role": "Utente"
+                    "t_role": "Utente", 
+                    "t_follower_number": random.randint(1, 50000)
                 }
             ]
 
