@@ -21,9 +21,48 @@ db = client.unieventmongodb
 # Seleziona le collezioni
 users_collection = db.Users
 messages_collection = db.Messages
+user_settings_collection = db.USER_SETTINGS
+follow_user_collection = db.FollowUser
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
+
+SETTINGS_MAPPING = {
+    "PRIVATE_ACCOUNT_TOGGLE": "privacy.visibility.private_account",
+    "SHOW_BOOKED_TOGGLE": "privacy.visibility.show_booked",
+    "MESSAGE_TOGGLE": "privacy.messages.all_user_send_message",
+    "DESKTOP_NOTIFICATION_TOGGLE": "notification.desktop.browser_consent",
+    "INTERACTION_LIKE_TOGGLE": "notification.interaction.like",
+    "INTERACTION_DISCUSSION_TOGGLE": "notification.interaction.comments",
+    "INTERACTION_TAG_TOGGLE": "notification.interaction.tag",
+    "INTERACTION_NEW_FOLLOWER_TOGGLE": "notification.interaction.new_follower_request",
+    "INTERACTION_SUGGEST_FOLLOWER_TOGGLE": "notification.interaction.follower_suggest",
+    "INTERACTION_TERMS_AND_CONDITION_TOGGLE": "notification.interaction.terms_and_condition",
+    "INTERACTION_PAYMENTS_TOGGLE": "notification.interaction.payments",
+    "INTERACTION_TICKETS_TOGGLE": "notification.interaction.tickets"
+}
+
+
+def get_user_settings(t_username):
+    user_settings = user_settings_collection.find_one({"t_username": t_username})
+    if user_settings:
+        return user_settings
+    return None
+
+
+def is_account_private(t_username):
+    user_settings = get_user_settings(t_username)
+    if user_settings:
+        private_account_path = SETTINGS_MAPPING["PRIVATE_ACCOUNT_TOGGLE"]
+        keys = private_account_path.split(".")
+        value = user_settings
+        for key in keys:
+            value = value.get(key, None)
+            if value is None:
+                break
+        return value == True
+    return False
+
 
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -69,10 +108,25 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # if not user_at:
             #     return func.HttpResponse("Utente destinatario non trovato.", status_code=404)
 
-            # Prepara il nuovo messaggio
+            # is_account_private_bool = is_account_private(user_at['t_username'])
+            # 
+            # if is_account_private_bool:
+            #     user_from = users_collection.find_one({"t_username": username})
+            #     #Verifica se l'utente 'from' segue l'utente 'to'
+            #     follow_record_1 = follow_user_collection.find_one({
+            #         "t_alias_generated_from": user_from.get("t_alias_generated"),
+            #         "t_alias_generated_to": t_alias_generated
+            #     })
+            #     follow_record_2 = follow_user_collection.find_one({
+            #         "t_alias_generated_from": t_alias_generated,
+            #         "t_alias_generated_to": user_from.get("t_alias_generated"),
+            #     })
+            #     if not follow_record_1 or not follow_record_2:
+            #         return func.HttpResponse("Non puoi inviare il messaggio, l'account dell'utente è privato, dovete seguirvi a vicenda.", status_code=400)
+
             new_message = {
                 "user_from": username,
-                "user_at": "", #user_at['t_username'],
+                "user_at": "",  #user_at['t_username'],
                 "message": message,
                 "dateTime": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             }

@@ -18,7 +18,6 @@ db = client.unieventmongodb
 users_collection = db.User
 discussion_collection = db.CONTENT_DISCUSSION
 
-
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
     if req.method == 'POST':

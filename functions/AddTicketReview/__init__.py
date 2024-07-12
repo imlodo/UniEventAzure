@@ -57,6 +57,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 req_body = req.get_json()
                 ticket_id = req_body.get('t_ticket_id')
+                event_id = req_body.get("t_event_id")
                 title = req_body.get('t_title')
                 body = req_body.get('t_body')
                 star = req_body.get('n_star')
@@ -65,7 +66,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Richiesta non valida.", status_code=400)
 
             # Controlla se i campi obbligatori sono presenti
-            if not all([ticket_id, title, body, star, review_date]):
+            if not all([ticket_id, event_id, title, body, star, review_date]):
                 return func.HttpResponse("Dati mancanti per la recensione.", status_code=400)
 
             # Controlla se il numero di stelle è nel range corretto
@@ -76,6 +77,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             review = {
                 "t_username": username,
                 "t_ticket_id": ticket_id,
+                "t_event_id": event_id,
                 "t_title": title,
                 "t_body": body,
                 "n_star": star,

@@ -111,10 +111,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "id": content_id,
                 "t_caption": "Vetrina artistica",
                 "t_image_link": "/assets/img/topic-image-placeholder.jpg",
-                "t_event_date": "2024-07-27T15:34:10.111Z",
+                "t_topic_date": "2024-07-07T15:34:10.526Z",
                 "t_alias_generated": "Alias1",
                 "n_click": 6720272,
-                "type": "Topics" if random.random() > 0.9 else "Eventi",
+                "type": "Topics" if random.random() > 0.5 else "Eventi",
                 "created_date": "2024-06-15T15:34:10.527Z"
             }
             if not content:
@@ -147,6 +147,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "id": content.get('id'),
                 "t_caption": content.get('t_caption'),
                 "t_image_link": content.get('t_image_link'),
+                "t_topic_date": content.get('t_topic_date'),
                 "t_user": {
                     "id": content_user.get('id'),
                     "t_name": content_user.get('t_name'),
@@ -164,8 +165,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "numOfComment": random.randint(1, 10000),  #count_records("Discussion",{"content_id":content_id}),
                 "numOfLike": random.randint(1, 10000),  #count_records("Like",{"content_id":content_id}),
                 "numOfBooked": random.randint(1, 10000),  #count_records("Booked",{"content_id":content_id})
-                "n_group_id": 1 if content.get("type") == "Eventi" else None,
-                "t_event_date": content.get("t_event_date") if content.get("type") == "Eventi" else None
+                "n_group_id": random.randint(1,10000) if content.get("type") == "Eventi" else None
             }
 
             return func.HttpResponse(
