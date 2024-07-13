@@ -8,6 +8,7 @@ from pymongo import MongoClient
 import azure.functions as func
 from werkzeug.security import check_password_hash
 import json
+import calendar
 
 # Carica le variabili di ambiente dal file .env
 load_dotenv()
@@ -31,14 +32,21 @@ def generate_jwt_token(user, t_event_ticket_list):
     # Configura la chiave segreta (da mantenere in un ambiente sicuro)
     secret_key = os.getenv('JWT_SECRET_KEY')
 
-    # Scadenza del token (15)
+    # Scadenza del token (15 minuti)
     expiration = datetime.utcnow() + timedelta(minutes=15)
+
+    # Per debug: stampa la data di scadenza come stringa
+    expiration_str = expiration.strftime('%Y-%m-%d %H:%M:%S')
+    print(f"Token expiration time: {expiration_str}")
+
+    # Converti la data di scadenza in timestamp Unix per il payload JWT
+    expiration_unix = calendar.timegm(expiration.utctimetuple())
 
     # Creazione del payload del token
     payload = {
         'username': user['t_username'],
         "t_event_ticket_list": t_event_ticket_list,
-        'exp': expiration
+        'exp': expiration_unix
     }
 
     # Genera il token JWT
@@ -63,11 +71,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # Estrai t_username e t_password dal corpo della richiesta
+            # Estrai t_username e t_event_ticket_list dal corpo della richiesta
             t_username = req_body.get('t_username')
             t_event_ticket_list = req_body.get('t_event_ticket_list')
 
-            if not t_username or t_event_ticket_list:
+            if not t_username or not t_event_ticket_list:
                 return func.HttpResponse(
                     "Inserire t_username e t_event_ticket_list nel corpo della richiesta.",
                     status_code=400
@@ -84,7 +92,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #         "Il tuo account è stato eliminato, contatta il supporto.",
             #         status_code=404
             #     )
-            
+
             # Mock user per scopi di esempio
             user = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
                         t_surname="Doe",
