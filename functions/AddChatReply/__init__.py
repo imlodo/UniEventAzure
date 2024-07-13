@@ -63,6 +63,20 @@ def is_account_private(t_username):
         return value == True
     return False
 
+def is_account_not_message(t_username):
+    user_settings = get_user_settings(t_username)
+    if user_settings:
+        message_account_path = SETTINGS_MAPPING["MESSAGE_TOGGLE"]
+        keys = message_account_path.split(".")
+        value = user_settings
+        for key in keys:
+            value = value.get(key, None)
+            if value is None:
+                break
+        return value == True
+    return False
+
+
 
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -109,7 +123,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     return func.HttpResponse("Utente destinatario non trovato.", status_code=404)
 
             # is_account_private_bool = is_account_private(user_at['t_username'])
-            # 
+            
             # if is_account_private_bool:
             #     user_from = users_collection.find_one({"t_username": username})
             #     #Verifica se l'utente 'from' segue l'utente 'to'
@@ -123,6 +137,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     })
             #     if not follow_record_1 or not follow_record_2:
             #         return func.HttpResponse("Non puoi inviare il messaggio, l'account dell'utente è privato, dovete seguirvi a vicenda.", status_code=400)
+
+            # is_account_not_message_bool = is_account_not_message(user_at['t_username'])
+            # if is_account_not_message_bool:
+            #     return func.HttpResponse("Non puoi inviare il messaggio, l'utente non desidera ricevere messaggi.", status_code=400)
 
             new_message = {
                 "user_from": username,

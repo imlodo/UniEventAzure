@@ -1,14 +1,17 @@
 import logging
 import os
-import random
+import json
 from datetime import datetime
-import pymongo
+
+import jwt
+from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
-import jwt
-import json
 
-# Connessione al cluster di Azure Cosmos DB for MongoDB
+# Carica le variabili di ambiente dal file .env
+load_dotenv()
+
+# Ottieni la stringa di connessione dal file delle variabili d'ambiente
 connectString = os.getenv("DB_CONNECTION_STRING")
 
 client = MongoClient(connectString)
@@ -16,40 +19,11 @@ client = MongoClient(connectString)
 # Seleziona il database
 db = client.unieventmongodb
 
-# Seleziona le collezioni (crea le collezioni se non esistono)
-contents_collection = db.Contents
-users_collection = db.User
-
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
 
-def count_records(countType, params):
-    if 'content_id' not in params:
-        raise ValueError("Il parametro content_id è obbligatorio.")
-    else:
-        filter_params = {
-            'content_id': str(params['content_id']),
-        }
-
-    if countType == 'Booked':
-        collection = db.CONTENT_BOOKED
-        count = collection.count_documents(filter_params)
-
-    elif countType == 'Discussion':
-        collection = db.CONTENT_DISCUSSION
-        count = collection.count_documents(filter_params)
-
-    elif countType == 'Like':
-        collection = db.CONTENT_LIKE
-        count = collection.count_documents(filter_params)
-
-    else:
-        raise ValueError(f"countType '{countType}' non valido.")
-
-    return count
-
-
+# Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -67,116 +41,265 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Decodifica il token JWT
             secret_key = os.getenv('JWT_SECRET_KEY')
-
             try:
                 decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
             except jwt.ExpiredSignatureError:
-                return func.HttpResponse(
-                    "Token scaduto.",
-                    status_code=401
-                )
+                return func.HttpResponse("Token scaduto.", status_code=401)
             except jwt.InvalidTokenError:
-                return func.HttpResponse(
-                    "Token non valido.",
-                    status_code=401
-                )
+                return func.HttpResponse("Token non valido.", status_code=401)
 
-            # Ottieni l'ID utente dal token decodificato
-            t_username = decoded_token.get('username')
-            if not t_username:
-                return func.HttpResponse(
-                    "Token non contiene un username valido.",
-                    status_code=401
-                )
+            # Ottieni l'username dal token decodificato
+            username = decoded_token.get('username')
+            if not username:
+                return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
-            # Recupera l'utente dal database usando t_username
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
+            # Ottieni il parametro n_group_id dalla query string
+            n_group_id = req.params.get('n_group_id')
+            if not n_group_id:
+                return func.HttpResponse("n_group_id è richiesto.", status_code=400)
 
-            # Ottieni i parametri dalla query string
-            content_id = req.params.get('id')
-            if not content_id:
-                return func.HttpResponse(
-                    "Parametro id contenuto non fornito nella query string.",
-                    status_code=400
-                )
+            # # Recupera gli eventi dal database
+            # events = db.EVENTS.find({"n_group_id": int(n_group_id)})
+            # 
+            # event_details = []
+            # for event in events:
+            #     event_id = event.get("id")
+            #     t_alias_generated = event.get("t_user").get("t_alias_generated")
+            # 
+            #     # Recupera l'utente
+            #     user = db.USERS.find_one({"t_alias_generated": t_alias_generated})
+            # 
+            #     # Recupera le mappe
+            #     maps = list(db.MAPS.find({"t_map_event_id": event_id}))
+            #     for map_item in maps:
+            #         t_map_id = map_item.get("t_map_id")
+            # 
+            #         # Recupera gli oggetti della mappa
+            #         object_maps = list(db.OBJECT_MAPS.find({"n_id_map": t_map_id}))
+            #         map_item["t_object_maps"] = object_maps
+            # 
+            #     # Recupera le recensioni
+            #     reviews = list(db.TicketReviews.find({"event_id": event_id}))
+            # 
+            #     # Recupera la location
+            #     location = db.LOCATIONS.find_one({"event_id": event_id})
+            # 
+            #     # Costruisci l'oggetto EventDetail
+            #     event_detail = {
+            #         "id": event_id,
+            #         "n_group_id": event.get("n_group_id"),
+            #         "n_click": event.get("n_click"),
+            #         "t_caption": event.get("t_caption"),
+            #         "t_image_link": event.get("t_image_link"),
+            #         "t_event_date": event.get("t_event_date"),
+            #         "t_map_list": maps,
+            #         "t_reviews": reviews,
+            #         "t_user": user,
+            #         "t_location": location,
+            #         "b_active": event.get("b_active"),
+            #         "t_privacy": event.get("t_privacy")
+            #     }
+            # 
+            #     event_details.append(event_detail)
 
-            # Verifica se il contenuto esiste
-            #content = contents_collection.find_one({"id": int(content_id)})
-            content = {
-                "id": content_id,
-                "t_caption": "Vetrina artistica",
-                "t_image_link": "/assets/img/topic-image-placeholder.jpg",
-                "t_topic_date": "2024-07-07T15:34:10.526Z",
-                "t_alias_generated": "Alias1",
-                "n_click": 6720272,
-                "type": "Topics" if random.random() > 0.5 else "Eventi",
-                "created_date": "2024-06-15T15:34:10.527Z"
-            }
-            if not content:
-                return func.HttpResponse(
-                    "Contenuto non trovato.",
-                    status_code=404
-                )
-
-            # Recupera i dettagli dell'utente associato al contenuto
-            #content_user = users_collection.find_one({"t_alias_generated": content.get("t_alias_generated")})
-            content_user = {
-                "id": 456,
-                "t_name": "Name 1",
-                "t_follower_number": 1705,
-                "t_alias_generated": "Alias1",
-                "t_description": "Ti aiutiamo a diventare la versione migliore di TE STESSO! Seguici su Instagram.",
-                "t_profile_photo": "/assets/img/userExampleImg.jpeg",
-                "t_type": 1,
-                "is_verified": False,
-                "type": "Utenti"
-            }
-            if not content_user:
-                return func.HttpResponse(
-                    "Utente associato al contenuto non trovato.",
-                    status_code=404
-                )
-
-            # Prepara l'oggetto di risposta
-            response_data = {
-                "id": content.get('id'),
-                "t_caption": content.get('t_caption'),
-                "t_image_link": content.get('t_image_link'),
-                "t_topic_date": content.get('t_topic_date'),
-                "t_user": {
-                    "id": content_user.get('id'),
-                    "t_name": content_user.get('t_name'),
-                    "t_follower_number": content_user.get('t_follower_number'),
-                    "t_alias_generated": content_user.get('t_alias_generated'),
-                    "t_description": content_user.get('t_description'),
-                    "t_profile_photo": content_user.get('t_profile_photo'),
-                    "t_type": content_user.get('t_type'),
-                    "is_verified": content_user.get('is_verified', False),
-                    "type": "Utenti"  # Puoi aggiungere logica per determinare il tipo
+            event_details = [
+                {
+                    "id": "event123",
+                    "n_group_id": 1,
+                    "n_click": 42,
+                    "t_caption": "Summer Music Festival",
+                    "t_image_link": "https://rivieraticket.it/wp-content/uploads/2023/08/Tropical-closing-party-Byblos-01-09-23.jpg",
+                    "t_event_date": "2024-08-15T19:00:00.000Z",
+                    "t_map_list": [
+                        {
+                            "t_map_name": "Main Stage",
+                            "t_map_event_id": "event123",
+                            "t_map_id": 101,
+                            "t_map_total_seat": 5000,
+                            "t_object_maps": [
+                                {
+                                    "n_id": 1,
+                                    "n_id_map": 101,
+                                    "n_min_num_person": 1,
+                                    "n_max_num_person": 4,
+                                    "n_limit_buy_for_person": 4,
+                                    "n_object_price": 100,
+                                    "n_obj_map_cord_x": 50,
+                                    "n_obj_map_cord_y": 75,
+                                    "n_obj_map_cord_z": 0,
+                                    "n_obj_map_width": 10,
+                                    "n_obj_map_height": 10,
+                                    "n_obj_map_fill": "#FF0000",
+                                    "n_obj_map_text": "VIP Section",
+                                    "t_note": "Closest to the stage",
+                                    "t_type": {
+                                        "TABLE": {
+                                            "DISCOTECA": False
+                                        }
+                                    },
+                                    "is_acquistabile": True,
+                                    "t_seat_list": [
+                                        {
+                                            "n_seat_num": 1,
+                                            "n_object_map_id": 1,
+                                            "n_id_event": "event123",
+                                            "is_sell": False,
+                                            "is_acquistabile": True
+                                        },
+                                        {
+                                            "n_seat_num": 2,
+                                            "n_object_map_id": 1,
+                                            "n_id_event": "event123",
+                                            "is_sell": True,
+                                            "is_acquistabile": False
+                                        }
+                                    ]
+                                }
+                            ],
+                            "t_map_type": "DISCOTECA"
+                        }
+                    ],
+                    "t_reviews": [
+                        {
+                            "id": "review1",
+                            "event_id": "event123",
+                            "n_stars": 4.5,
+                            "t_title": "Amazing Festival",
+                            "t_body": "Had a great time, the music was fantastic!",
+                            "t_user": {
+                                "t_name": "John",
+                                "t_surname": "Doe",
+                                "t_alias_generated": "john_doe_123",
+                                "t_type": "regular",
+                                "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg"
+                            },
+                            "review_date": "2024-08-16T10:00:00.000Z"
+                        }
+                    ],
+                    "t_user": {
+                        "t_name": "Alice",
+                        "t_surname": "Smith",
+                        "t_alias_generated": "alice_smith_456",
+                        "t_type": "organizer",
+                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg"
+                    },
+                    "t_location": {
+                        "id": "location1",
+                        "t_address": "123 Festival Lane",
+                        "t_cap": "12345",
+                        "t_city": "Music City",
+                        "t_province": "Music Province",
+                        "t_state": "Music State",
+                        "t_location_name": "Music Park"
+                    },
+                    "b_active": True,
+                    "t_privacy": "All"
                 },
-                "n_click": content.get('n_click'),
-                "type": content.get('type'),
-                "created_date": content.get('created_date'),
-                "numOfComment": random.randint(1, 10000),  #count_records("Discussion",{"content_id":content_id}),
-                "numOfLike": random.randint(1, 10000),  #count_records("Like",{"content_id":content_id}),
-                "numOfBooked": random.randint(1, 10000),  #count_records("Booked",{"content_id":content_id})
-                "n_group_id": random.randint(1,10000) if content.get("type") == "Eventi" else None
-            }
-
+                {
+                    "id": "event124",
+                    "n_group_id": 1,
+                    "n_click": 25,
+                    "t_caption": "Tech Conference",
+                    "t_image_link": "https://rivieraticket.it/wp-content/uploads/2023/08/Tropical-closing-party-Byblos-01-09-23.jpg",
+                    "t_event_date": "2024-09-20T09:00:00.000Z",
+                    "t_map_list": [
+                        {
+                            "t_map_name": "Main Hall",
+                            "t_map_event_id": "event124",
+                            "t_map_id": 102,
+                            "t_map_total_seat": 2000,
+                            "t_object_maps": [
+                                {
+                                    "n_id": 2,
+                                    "n_id_map": 102,
+                                    "n_min_num_person": 1,
+                                    "n_max_num_person": 10,
+                                    "n_limit_buy_for_person": 10,
+                                    "n_object_price": 150,
+                                    "n_obj_map_cord_x": 30,
+                                    "n_obj_map_cord_y": 60,
+                                    "n_obj_map_cord_z": 0,
+                                    "n_obj_map_width": 20,
+                                    "n_obj_map_height": 20,
+                                    "n_obj_map_fill": "#00FF00",
+                                    "n_obj_map_text": "Premium Section",
+                                    "t_note": "Best view of the stage",
+                                    "t_type": {
+                                        "TABLE": {
+                                            "DISCOTECA": False
+                                        }
+                                    },
+                                    "is_acquistabile": True,
+                                    "t_seat_list": [
+                                        {
+                                            "n_seat_num": 1,
+                                            "n_object_map_id": 2,
+                                            "n_id_event": "event124",
+                                            "is_sell": False,
+                                            "is_acquistabile": True
+                                        },
+                                        {
+                                            "n_seat_num": 2,
+                                            "n_object_map_id": 2,
+                                            "n_id_event": "event124",
+                                            "is_sell": True,
+                                            "is_acquistabile": False
+                                        }
+                                    ]
+                                }
+                            ],
+                            "t_map_type": "CONFERENCE"
+                        }
+                    ],
+                    "t_reviews": [
+                        {
+                            "id": "review2",
+                            "event_id": "event124",
+                            "n_stars": 5,
+                            "t_title": "Incredibly Informative",
+                            "t_body": "Learned so much, great speakers!",
+                            "t_user": {
+                                "t_name": "Jane",
+                                "t_surname": "Doe",
+                                "t_alias_generated": "jane_doe_789",
+                                "t_type": "regular",
+                                "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg"
+                            },
+                            "review_date": "2024-09-21T11:00:00.000Z"
+                        }
+                    ],
+                    "t_user": {
+                        "t_name": "Bob",
+                        "t_surname": "Johnson",
+                        "t_alias_generated": "bob_johnson_101",
+                        "t_type": "organizer",
+                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg"
+                    },
+                    "t_location": {
+                        "id": "location2",
+                        "t_address": "456 Tech Avenue",
+                        "t_cap": "67890",
+                        "t_city": "Tech City",
+                        "t_province": "Tech Province",
+                        "t_state": "Tech State",
+                        "t_location_name": "Tech Center"
+                    },
+                    "b_active": True,
+                    "t_privacy": "All"
+                }
+            ]
             return func.HttpResponse(
-                body=json.dumps(response_data),
+                body=json.dumps(event_details),
                 status_code=200,
                 mimetype='application/json'
             )
 
         except Exception as e:
-            logging.error(f"Errore: {e}")
-            return func.HttpResponse("Errore durante l'elaborazione della richiesta", status_code=500)
+            logging.error(f"Exception occurred: {e}")
+            return func.HttpResponse(
+                "Si è verificato un errore durante il recupero dei dettagli degli eventi.",
+                status_code=500
+            )
 
     else:
         return func.HttpResponse(

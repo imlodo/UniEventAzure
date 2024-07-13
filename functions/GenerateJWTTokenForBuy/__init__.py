@@ -26,29 +26,18 @@ users_collection = db.User
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
-
-# Funzione per verificare le credenziali dell'utente
-def verify_user(t_username, password):
-    user = users_collection.find_one({"t_username": t_username})
-    if user and check_password_hash(user['t_password'], password):
-        # Rimuovi il campo password dall'oggetto utente
-        del user['t_password']
-        return user
-    return None
-
-
 # Funzione per generare un token JWT
-def generate_jwt_token(user):
+def generate_jwt_token(user, t_event_ticket_list):
     # Configura la chiave segreta (da mantenere in un ambiente sicuro)
     secret_key = os.getenv('JWT_SECRET_KEY')
 
-    # Scadenza del token (2 ore)
-    expiration = datetime.utcnow() + timedelta(minutes=1440)
+    # Scadenza del token (15)
+    expiration = datetime.utcnow() + timedelta(minutes=15)
 
     # Creazione del payload del token
     payload = {
-        'user_id': str(user['_id']),  # Assumendo che l'ID utente sia un ObjectId
         'username': user['t_username'],
+        "t_event_ticket_list": t_event_ticket_list,
         'exp': expiration
     }
 
@@ -76,21 +65,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Estrai t_username e t_password dal corpo della richiesta
             t_username = req_body.get('t_username')
-            t_password = req_body.get('t_password')
+            t_event_ticket_list = req_body.get('t_event_ticket_list')
 
-            if not t_username or not t_password:
+            if not t_username or t_event_ticket_list:
                 return func.HttpResponse(
-                    "Inserire t_username e t_password nel corpo della richiesta.",
+                    "Inserire t_username e t_event_ticket_list nel corpo della richiesta.",
                     status_code=400
                 )
 
-            # Verifica le credenziali dell'utente nel database
-            # user = verify_user(t_username, t_password)
+            # user = users_collection.find_one({"t_username": t_username})
+            # if not user:
+            #     return func.HttpResponse(
+            #         "User non trovato.",
+            #         status_code=404
+            #     )
             # if user.get("active") == False:
             #     return func.HttpResponse(
             #         "Il tuo account è stato eliminato, contatta il supporto.",
             #         status_code=404
             #     )
+            
             # Mock user per scopi di esempio
             user = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
                         t_surname="Doe",
@@ -100,7 +94,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             if user:
                 # Genera il token JWT
-                jwt_token = generate_jwt_token(user)
+                jwt_token = generate_jwt_token(user, t_event_ticket_list)
 
                 # Costruisci il corpo della risposta come una stringa JSON
                 response_body = json.dumps({"token": jwt_token})

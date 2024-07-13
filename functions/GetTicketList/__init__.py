@@ -63,6 +63,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     ticket_data = {
             #         "ticket_id": ticket.get("ticket_id"),
             #         "event_name": ticket.get("event_name"),
+            #         "event_id": ticket.get("t_event_id"),
             #         "status": "Confermato" if ticket.get("status") == "confirmed" else "Annullato",
             #         "creation_date": datetime.strptime(ticket.get("creation_date"), "%Y-%m-%d").strftime("%d/%m/%Y")
             #     }
@@ -72,6 +73,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 {
                     "ticket_id": "ABC123",
                     "event_name": "Summer Music Festival",
+                    "event_id": "ABCD213SA",
                     "status": "Confermato",
                     "creation_date": "20/06/2023"
                 },
@@ -79,59 +81,69 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "ticket_id": "DEF456",
                     "event_name": "Concerto Rock",
                     "status": "Annullato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "15/05/2023"
                 },
                 {
                     "ticket_id": "GHI789",
                     "event_name": "Tech Conference",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "10/04/2023"
                 },
                 {
                     "ticket_id": "JKL012",
                     "event_name": "Art Exhibition",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "25/03/2023"
                 },
                 {
                     "ticket_id": "MNO345",
                     "event_name": "Food Festival",
                     "status": "Annullato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "05/02/2023"
                 },
                 {
                     "ticket_id": "PQR678",
                     "event_name": "Comedy Night",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "22/01/2023"
                 },
                 {
                     "ticket_id": "STU901",
                     "event_name": "Jazz Concert",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "30/12/2022"
                 },
                 {
                     "ticket_id": "VWX234",
                     "event_name": "Theater Play",
                     "status": "Annullato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "18/11/2022"
                 },
                 {
                     "ticket_id": "YZA567",
                     "event_name": "Sports Event",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "14/10/2022"
                 },
                 {
                     "ticket_id": "BCD890",
                     "event_name": "Dance Performance",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "29/09/2022"
                 },
                 {
                     "ticket_id": "EFG123",
                     "event_name": "Film Premiere",
+                    "event_id": "ABCD213SA",
                     "status": "Annullato",
                     "creation_date": "12/08/2022"
                 },
@@ -139,24 +151,28 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "ticket_id": "HIJ456",
                     "event_name": "Book Fair",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "04/07/2022"
                 },
                 {
                     "ticket_id": "KLM789",
                     "event_name": "Science Expo",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "21/06/2022"
                 },
                 {
                     "ticket_id": "NOP012",
                     "event_name": "Fashion Show",
                     "status": "Annullato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "09/05/2022"
                 },
                 {
                     "ticket_id": "QRS345",
                     "event_name": "Gaming Convention",
                     "status": "Confermato",
+                    "event_id": "ABCD213SA",
                     "creation_date": "31/03/2022"
                 }
             ]
