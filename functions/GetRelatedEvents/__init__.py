@@ -59,7 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("n_group_id è richiesto.", status_code=400)
 
             # # Recupera gli eventi dal database
-            # events = db.EVENTS.find({"n_group_id": int(n_group_id)})
+            # events = db.Content.find({"n_group_id": int(n_group_id)})
             # 
             # event_details = []
             # for event in events:

@@ -20,7 +20,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-user_settings_collection = db.USER_SETTINGS
+user_settings_collection = db.UserSettings
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

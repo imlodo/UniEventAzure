@@ -19,7 +19,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione dei biglietti
-tickets_collection = db.TICKETS
+tickets_collection = db.Tickets
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -72,6 +72,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 },
                 "price": "50.00",
                 "event": {
+                    "event_id": "ABCD213SA",
                     "t_title": "Summer Music Festival",
                     "t_event_date": "15/07/2023",
                     "t_image_link": "/assets/img/event-image-placeholder.jpg"
@@ -84,6 +85,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     "ticket_type": ticket.get("ticket_type", {}),
             #     "price": "{:.2f}".format(ticket.get("price", 0)),
             #     "event": {
+            #         "event_id": ticket.get("event_id"),
             #         "t_title": ticket.get("event_name"),
             #         "t_event_date": ticket.get("event_date"),
             #         "t_image_link": ticket.get("event_image_link")

@@ -21,7 +21,7 @@ db = client.unieventmongodb
 # Seleziona le collezioni
 users_collection = db.Users
 messages_collection = db.Messages
-user_settings_collection = db.USER_SETTINGS
+user_settings_collection = db.UserSettings
 follow_user_collection = db.FollowUser
 
 # Setup del logger per l'Azure Function
@@ -41,7 +41,6 @@ SETTINGS_MAPPING = {
     "INTERACTION_PAYMENTS_TOGGLE": "notification.interaction.payments",
     "INTERACTION_TICKETS_TOGGLE": "notification.interaction.tickets"
 }
-
 
 def get_user_settings(t_username):
     user_settings = user_settings_collection.find_one({"t_username": t_username})

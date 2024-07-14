@@ -20,7 +20,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione dei biglietti
-tickets_collection = db.TICKETS
+tickets_collection = db.Tickets
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

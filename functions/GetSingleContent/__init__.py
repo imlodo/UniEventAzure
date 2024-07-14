@@ -540,8 +540,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                                     "n_seat_num": 2,
                                     "n_object_map_id": 11,
                                     "n_id_event": "event124",
-                                    "is_sell": True,
-                                    "is_acquistabile": False
+                                    "is_sell": False,
+                                    "is_acquistabile": True
                                 }
                             ]
                         },
