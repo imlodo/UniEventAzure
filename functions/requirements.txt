@@ -3,6 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
+azure-storage-blob
 pymongo~=4.7.3
 PyJWT~=2.8.0
 Werkzeug~=3.0.3

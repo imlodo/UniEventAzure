@@ -197,4 +197,4 @@ def ticket_altered(ticket):
 
 def process_payment(card, amount):
     # Logica per pagamento
-    return random.random() > 0.9
+    return random.random() > 0.1
