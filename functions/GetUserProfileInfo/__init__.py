@@ -17,7 +17,7 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 users_collection = db.User
-content_collection = db.Content
+content_collection = db.Contents
 content_booked_collection = db.ContentBooked
 content_liked_collection = db.ContentLiked
 follow_user_collection = db.FollowUser

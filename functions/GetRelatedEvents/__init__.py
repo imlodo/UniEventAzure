@@ -70,19 +70,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     user = db.USERS.find_one({"t_alias_generated": t_alias_generated})
             # 
             #     # Recupera le mappe
-            #     maps = list(db.MAPS.find({"t_map_event_id": event_id}))
+            #     maps = list(db.EventMaps.find({"t_map_event_id": event_id}))
             #     for map_item in maps:
             #         t_map_id = map_item.get("t_map_id")
             # 
             #         # Recupera gli oggetti della mappa
-            #         object_maps = list(db.OBJECT_MAPS.find({"n_id_map": t_map_id}))
+            #         object_maps = list(db.ObjectMaps.find({"n_id_map": t_map_id}))
             #         map_item["t_object_maps"] = object_maps
             # 
             #     # Recupera le recensioni
             #     reviews = list(db.TicketReviews.find({"event_id": event_id}))
             # 
             #     # Recupera la location
-            #     location = db.LOCATIONS.find_one({"event_id": event_id})
+            #     location = db.EventLocation.find_one({"event_id": event_id})
             # 
             #     # Costruisci l'oggetto EventDetail
             #     event_detail = {

@@ -96,7 +96,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         t_surname="Doe",
                         t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                         t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg", is_verified=True,
-                        t_type="CREATOR")
+                        t_type="ARTIST")
 
             if user:
                 # Genera il token JWT

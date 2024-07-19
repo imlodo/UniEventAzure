@@ -98,7 +98,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                      t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                                      t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
                                      is_verified=False,
-                                     t_type="CREATOR")
+                                     t_type="ARTIST")
                 else:
                     user_info = dict(_id="012933924", t_username="mariobaldi", t_password="hashed_password",
                                      t_name="Mario",
@@ -114,7 +114,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                  t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                                  t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
                                  is_verified=False,
-                                 t_type="CREATOR")
+                                 t_type="ARTIST")
 
             if user_info:
                 # Costruisci il corpo della risposta come oggetto JSON senza 't_password' e '_id'
