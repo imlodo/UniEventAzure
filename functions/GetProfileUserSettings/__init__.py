@@ -21,6 +21,7 @@ db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
 user_settings_collection = db.UserSettings
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -101,13 +102,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "Token non contiene un username valido.",
                     status_code=401
                 )
+            t_alias_generated = req.params.get('t_alias_generated')
+            user = users_collection.find_one({"t_alias_generated": t_alias_generated})
 
             # Ottieni il tipo di impostazione dalla query string
             setting_type = req.params.get('setting_type')
 
             # Recupera le impostazioni utente dal database
             try:
-                # settings = get_user_settings(t_username, setting_type)
+                # settings = get_user_settings(user.get("t_username"), setting_type)
                 # INIZIO MOCK - Mock settings
                 settings = {
                     "privacy": {
@@ -116,7 +119,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         },
                         "visibility": {
                             "private_account": random.random() > 0.5,
-                            "show_booked": random.random() > 0.5
+                            "show_booked": False
                         }
                     },
                     "notification": {

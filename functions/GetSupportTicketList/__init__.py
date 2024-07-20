@@ -20,6 +20,7 @@ db = client.unieventmongodb
 
 # Seleziona la collezione per i ticket di supporto
 support_tickets_collection = db.SupportTickets
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -53,7 +54,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
             # Recupera i ticket di supporto dal database
-            # tickets = support_tickets_collection.find({"t_username": username})
+            # user = users_collection.find_one({"t_username": username})
+            # if user.get("t_role") != "Utente":
+            #     tickets = support_tickets_collection.find()
+            # else:
+            #     tickets = support_tickets_collection.find({"t_username": username})
             # ticket_list = []
             # 
             # # Ottieni la data odierna

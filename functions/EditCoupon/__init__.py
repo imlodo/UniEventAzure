@@ -18,7 +18,6 @@ content_collection = db.Contents
 users_collection = db.Users
 coupons_collection = db.EventCoupon
 
-
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -51,11 +50,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Ottieni il corpo della richiesta
             req_body = req.get_json()
+            coupon_id = req_body.get('coupon_id')
             coupon_code = req_body.get('coupon_code')
             discount = req_body.get('discount')
             content_id = req_body.get('content_id')
 
-            if not coupon_code or not discount or not content_id:
+            if not coupon_id or not coupon_code or not discount or not content_id:
                 return func.HttpResponse("Dati incompleti nel corpo della richiesta.", status_code=400)
 
             # Trova l'utente
@@ -70,17 +70,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # if not content:
             #     return func.HttpResponse("Contenuto non trovato o l'utente non è autorizzato.", status_code=404)
             # 
-            # # Aggiungi il coupon
-            # new_coupon = {
-            #     "coupon_id": str(pymongo.collection.ObjectId()),
-            #     "event_id": content_id,
-            #     "coupon_code": coupon_code,
-            #     "discount": discount
-            # }
+            # # Trova il coupon
+            # coupon = coupons_collection.find_one({"coupon_id": coupon_id, "event_id": content_id})
+            # if not coupon:
+            #     return func.HttpResponse("Coupon non trovato per il contenuto specificato.", status_code=404)
             # 
-            #coupon = coupons_collection.insert_one(new_coupon)
-
-            coupon = {"coupon_id": "AASDASD3121", "event_id": content_id, "coupon_code": coupon_code,
+            # # Modifica il coupon
+            # coupons_collection.update_one(
+            #     {"coupon_id": coupon_id},
+            #     {"$set": {"coupon_code": coupon_code, "discount": discount}}
+            # )
+            coupon = {"coupon_id": coupon_id, "event_id": content_id, "coupon_code": coupon_code,
                       "discount": discount}
             return func.HttpResponse(
                 json.dumps({"coupon": coupon}, default=str),
@@ -90,7 +90,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
-            return func.HttpResponse("Si è verificato un errore durante l'aggiunta del coupon.", status_code=500)
+            return func.HttpResponse("Si è verificato un errore durante la modifica del coupon.", status_code=500)
 
     else:
         return func.HttpResponse(status_code=404)

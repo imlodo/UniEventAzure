@@ -21,7 +21,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-users_collection = db.User
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -96,7 +96,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         t_surname="Doe",
                         t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                         t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg", is_verified=True,
-                        t_type="ARTIST")
+                        t_type="COMPANY",
+                        t_role="Moderatore")
 
             if user:
                 # Genera il token JWT

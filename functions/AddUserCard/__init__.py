@@ -17,7 +17,7 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 user_cards_collection = db.UserCards
-users_collection = db.User
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

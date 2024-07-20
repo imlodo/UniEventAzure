@@ -17,7 +17,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-users_collection = db.User
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -98,7 +98,8 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                      t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                                      t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
                                      is_verified=False,
-                                     t_type="ARTIST")
+                                     t_type="COMPANY",
+                                     t_role="Moderatore")
                 else:
                     user_info = dict(_id="012933924", t_username="mariobaldi", t_password="hashed_password",
                                      t_name="Mario",
@@ -106,7 +107,8 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                      t_alias_generated="Mario Baldi", t_description="Lorem ipsum dolor sit amet.",
                                      t_profile_photo="http://localhost:4200/assets/img/dolcevita.png",
                                      is_verified=True,
-                                     t_type="ARTIST")
+                                     t_type="COMPANY",
+                                     t_role="Moderatore") #"Super Moderatore" "Utente"
             else:
                 # user_info = get_user_info_by_username(t_username)
                 user_info = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
@@ -114,7 +116,8 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                  t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
                                  t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
                                  is_verified=False,
-                                 t_type="ARTIST")
+                                 t_type="COMPANY",
+                                 t_role="Moderatore")
 
             if user_info:
                 # Costruisci il corpo della risposta come oggetto JSON senza 't_password' e '_id'

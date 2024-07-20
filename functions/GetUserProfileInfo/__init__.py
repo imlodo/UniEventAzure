@@ -16,7 +16,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona le collezioni
-users_collection = db.User
+users_collection = db.Users
 content_collection = db.Contents
 content_booked_collection = db.ContentBooked
 content_liked_collection = db.ContentLiked

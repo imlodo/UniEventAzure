@@ -21,6 +21,9 @@ db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
 user_settings_collection = db.UserSettings
+follow_user_collection = db.FollowUser
+follow_user_request_collection = db.FollowUserRequest
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -41,12 +44,30 @@ SETTINGS_MAPPING = {
     "INTERACTION_TICKETS_TOGGLE": "notification.interaction.tickets"
 }
 
+
 def update_user_settings(t_username, setting_type, value):
     # Trova l'impostazione corrispondente
     if setting_type not in SETTINGS_MAPPING:
         raise ValueError(f"Invalid setting type: {setting_type}")
 
     setting_path = SETTINGS_MAPPING[setting_type]
+    user = users_collection.find_one({"t_username": t_username})
+
+    if not user:
+        raise ValueError(f"User not found: {t_username}")
+
+    t_alias_generated = user.get("t_alias_generated")
+
+    if setting_path == "privacy.visibility.private_account" and value is True:
+        follow_user_requests = follow_user_request_collection.find({"t_alias_generated_to": t_alias_generated})
+
+        for request in follow_user_requests:
+            t_alias_generated_from = request.get("t_alias_generated_from")
+            follow_user_record = {
+                "t_alias_generated_to": t_alias_generated,
+                "t_alias_generated_from": t_alias_generated_from
+            }
+            follow_user_collection.insert_one(follow_user_record)
 
     # Converti il path in dot notation in un dict per $set
     update_query = {setting_path: value}
@@ -55,7 +76,9 @@ def update_user_settings(t_username, setting_type, value):
         {"t_username": t_username},
         {"$set": update_query}
     )
+
     return result.modified_count > 0
+
 
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -117,7 +140,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Esegui l'aggiornamento delle impostazioni utente nel database
             try:
-                if random() > 0.5: #update_user_settings(t_username, setting_type, value):
+                if random() > 0.5:  #update_user_settings(t_username, setting_type, value):
                     response_body = json.dumps({"message": "Impostazioni aggiornate con successo."})
                     return func.HttpResponse(
                         body=response_body,

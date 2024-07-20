@@ -12,7 +12,7 @@ client = pymongo.MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-users_collection = db.User
+users_collection = db.Users
 
 
 def username_exists(username):

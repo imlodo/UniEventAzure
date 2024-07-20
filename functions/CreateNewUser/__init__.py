@@ -36,7 +36,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-users_collection = db.User
+users_collection = db.Users
 
 
 # Funzione per generare un alias univoco

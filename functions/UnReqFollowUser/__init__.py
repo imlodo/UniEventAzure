@@ -21,7 +21,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-follow_user_collection = db.FollowUser
+follow_user_request_collection = db.FollowUserRequest
 users_collection = db.Users
 
 # Setup del logger per l'Azure Function
@@ -93,24 +93,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Inserimento del nuovo record nella collezione FollowUser
-            #result = follow_user_collection.delete_one({
+            #result = follow_user_request_collection.delete_one({
             #   "t_alias_generated_from": user.get("t_alias_generated"),
             #  "t_alias_generated_to": t_alias_generated_to
             #})
             # if result.deleted_count > 0 :
             #     return func.HttpResponse(
-            #         body=json.dumps({"message": "Unfollow dell'utente eseguito con successo."}),
+            #         body=json.dumps({"message": "Richiesta eliminata con successo."}),
             #         status_code=200,
             #         mimetype='application/json'
             #     )
             # else:
             #     return func.HttpResponse(
-            #         body=json.dumps({"message": "Unfollow dell'utente non riuscito"}),
+            #         body=json.dumps({"message": "Richiesta non eliminata, riprova"}),
             #         status_code=400,
             #         mimetype='application/json'
             #     )
             return func.HttpResponse(
-                body=json.dumps({"message": "Unfollow dell'utente eseguito con successo."}),
+                body=json.dumps({"message": "Richiesta eliminata con successo."}),
                 status_code=200,
                 mimetype='application/json'
             )
