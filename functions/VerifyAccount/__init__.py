@@ -18,7 +18,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione (crea la collezione se non esiste)
-user_verify_collection = db.USER_VERIFY
+user_verify_collection = db.UserVerify
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

@@ -14,8 +14,8 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 users_collection = db.Users
-discussion_collection = db.CONTENT_DISCUSSION
-discussion_like_collection = db.DISCUSSION_LIKE
+discussion_collection = db.ContentDiscussion
+discussion_like_collection = db.DiscussionLike
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:

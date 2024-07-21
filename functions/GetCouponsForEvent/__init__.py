@@ -18,8 +18,8 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 event_coupon_collection = db.EventCoupon
-user_collection = db.User
-event_collection = db.Event
+user_collection = db.Users
+event_collection = db.Contents
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

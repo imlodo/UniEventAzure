@@ -21,9 +21,9 @@ db = client.unieventmongodb
 # Seleziona le collezioni
 content_collection = db.Contents
 users_collection = db.Users
-content_like_collection = db.CONTENT_LIKE
-content_booked_collection = db.CONTENT_BOOKED
-content_discussion_collection = db.CONTENT_DISCUSSION
+content_like_collection = db.ContentLike
+content_booked_collection = db.ContentBooked
+content_discussion_collection = db.ContentDiscussion
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

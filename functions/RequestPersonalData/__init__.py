@@ -19,8 +19,8 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione per le richieste di download dei dati personali
-requests_collection = db.PERSONAL_DATA_REQUESTS
-user_data_collection = db.USER_DATA
+requests_collection = db.PersonalDataRequest
+user_data_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +32,7 @@ def create_personal_data_file(t_username, type_download, type_data_download):
     if not user_data:
         raise ValueError("Nessun dato trovato per l'utente.")
 
-    # Filtra i dati in base a type_download
+    # Filtra i dati in base a type_download, va modificata
     filtered_data = {}
     if type_download == "ALL_DATA" or "CHAT_DATA" in type_download:
         filtered_data["chat_data"] = user_data.get("chat_data", {})

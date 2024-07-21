@@ -40,7 +40,7 @@ def get_user_info(t_alias_generated):
 
 # Funzione per ottenere i contenuti dell'utente (ultimi 5)
 def get_user_content(t_alias_generated, limit=5):
-    contents = content_collection.find({"t_user.t_alias_generated": t_alias_generated}).sort("created_date",
+    contents = content_collection.find({"t_alias_generated": t_alias_generated}).sort("created_date",
                                                                                              pymongo.DESCENDING).limit(
         limit)
     content_list = []
@@ -52,12 +52,12 @@ def get_user_content(t_alias_generated, limit=5):
 
 
 # Funzione per ottenere i contenuti aggiunti ai preferiti dall'utente (ultimi 5)
-def get_user_booked_content(t_alias_generated, limit=5):
-    booked_contents = content_booked_collection.find({"t_user.t_alias_generated": t_alias_generated}).sort(
+def get_user_booked_content(t_username, limit=5):
+    booked_contents = content_booked_collection.find({"t_username": t_username}).sort(
         "created_date", pymongo.DESCENDING).limit(limit)
     content_list = []
     for booked in booked_contents:
-        content = content_collection.find_one({"id": booked["content_id"]})
+        content = content_collection.find_one({"_id": booked["content_id"]})
         if content:
             if '_id' in content:
                 del content['_id']
@@ -72,7 +72,7 @@ def get_user_liked_content(t_alias_generated, limit=5):
         limit)
     content_list = []
     for liked in liked_contents:
-        content = content_collection.find_one({"id": liked["content_id"]})
+        content = content_collection.find_one({"_id": liked["content_id"]})
         if content:
             if '_id' in content:
                 del content['_id']
@@ -122,6 +122,12 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Ottieni l'alias dall'URL della richiesta
             t_alias_generated = req.params.get('t_alias_generated')
+            #user = users_collection.find_one({"t_alias_generated": t_alias_generated})
+            # if not user:
+            #     return HttpResponse(
+            #         "User non trovato",
+            #         status_code=404
+            #     )
             if not t_alias_generated:
                 return HttpResponse(
                     "Parametro t_alias_generated mancante.",
@@ -135,7 +141,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Ottieni i contenuti dell'utente dal database (ultimi 5)
             # content_list = get_user_content(t_alias_generated)
-            # booked_list = get_user_booked_content(t_alias_generated)
+            # booked_list = get_user_booked_content(user.get("t_username"))
             # liked_list = get_user_liked_content(t_alias_generated)
 
             content_list = [

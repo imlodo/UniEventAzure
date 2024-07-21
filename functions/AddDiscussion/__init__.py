@@ -16,7 +16,7 @@ db = client.unieventmongodb
 
 # Seleziona le collezioni
 users_collection = db.Users
-discussion_collection = db.CONTENT_DISCUSSION
+discussion_collection = db.ContentDiscussion
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -100,7 +100,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "like_count": 0,
                     "t_user": t_user,
                     "created_date": created_date,
-                    "is_liked_by_current_user": False,
                     "t_alias_generated_reply": t_alias_generated_reply
                 }
                 return func.HttpResponse(

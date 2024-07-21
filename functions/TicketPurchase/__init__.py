@@ -16,7 +16,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 tickets_collection = db.Tickets
 users_collection = db.Users
-events_collection = db.Contents
+content_collection = db.Contents
 user_cards_collection = db.UserCards
 user_addresses_collection = db.UserAddresses
 event_coupons_collection = db.EventCoupon
@@ -85,7 +85,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # # Verifica l'evento
-            # event = events_collection.find_one({"_id": ObjectId(event_id)})
+            # event = content_collection.find_one({"_id": ObjectId(event_id)})
             # if not event:
             #     return func.HttpResponse(
             #         "Evento non trovato.",

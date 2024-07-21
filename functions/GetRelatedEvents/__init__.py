@@ -59,7 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("n_group_id è richiesto.", status_code=400)
 
             # # Recupera gli eventi dal database
-            # events = db.Content.find({"n_group_id": int(n_group_id)})
+            # events = db.Contents.find({"n_group_id": int(n_group_id)})
             # 
             # event_details = []
             # for event in events:
@@ -67,7 +67,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             #     t_alias_generated = event.get("t_user").get("t_alias_generated")
             # 
             #     # Recupera l'utente
-            #     user = db.USERS.find_one({"t_alias_generated": t_alias_generated})
+            #     user = db.Users.find_one({"t_alias_generated": t_alias_generated})
             # 
             #     # Recupera le mappe
             #     maps = list(db.EventMaps.find({"t_map_event_id": event_id}))

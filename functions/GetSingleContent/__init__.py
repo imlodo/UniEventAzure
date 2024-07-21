@@ -17,7 +17,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona le collezioni (crea le collezioni se non esistono)
-contents_collection = db.Contents
+content_collection = db.Contents
 content_tags_collections = db.ContentTags
 content_mentions_collections = db.ContentMentions
 users_collection = db.Users
@@ -35,15 +35,15 @@ def count_records(countType, params):
         }
 
     if countType == 'Booked':
-        collection = db.CONTENT_BOOKED
+        collection = db.ContentBooked
         count = collection.count_documents(filter_params)
 
     elif countType == 'Discussion':
-        collection = db.CONTENT_DISCUSSION
+        collection = db.ContentDiscussion
         count = collection.count_documents(filter_params)
 
     elif countType == 'Like':
-        collection = db.CONTENT_LIKE
+        collection = db.ContentLike
         count = collection.count_documents(filter_params)
 
     else:
@@ -108,7 +108,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Verifica se il contenuto esiste
-            # content = contents_collection.find_one({"id": int(content_id)})
+            # content = content_collection.find_one({"_id": content_id})
             maps = [
                 {
                     "t_map_name": "Main Stage",

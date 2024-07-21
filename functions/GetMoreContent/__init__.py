@@ -21,7 +21,7 @@ content_collection = db.Contents
 # Seleziona la collezione USERS
 users_collection = db.Users
 # Seleziona la collezione CONTENT_BOOKED
-content_like_collection = db.CONTENT_LIKE
+content_like_collection = db.ContentLike
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -36,15 +36,15 @@ def count_records(countType, params):
         }
 
     if countType == 'Booked':
-        collection = db.CONTENT_BOOKED
+        collection = db.ContentBooked
         count = collection.count_documents(filter_params)
 
     elif countType == 'Discussion':
-        collection = db.CONTENT_DISCUSSION
+        collection = db.ContentDiscussion
         count = collection.count_documents(filter_params)
 
     elif countType == 'Like':
-        collection = db.CONTENT_LIKE
+        collection = db.ContentLike
         count = collection.count_documents(filter_params)
 
     else:
