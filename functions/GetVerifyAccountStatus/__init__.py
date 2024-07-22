@@ -72,21 +72,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=401
                 )
 
-            # # Recupera l'utente dal database usando t_username
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # # Verifica il ruolo dell'utente
-            # user_role = user.get('t_role')
-            # if user_role not in [USER_ROLE.MODERATORE.value, USER_ROLE.SUPERMODERATORE.value]:
-            #     return func.HttpResponse(
-            #         "Permessi insufficienti.",
-            #         status_code=403
-            #     )
+            # Recupera l'utente dal database usando t_username
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
+
+            # Verifica il ruolo dell'utente
+            user_role = user.get('t_role')
+            if user_role not in [USER_ROLE.MODERATORE.value, USER_ROLE.SUPERMODERATORE.value]:
+                return func.HttpResponse(
+                    "Permessi insufficienti.",
+                    status_code=403
+                )
 
             # Ottieni l'username dalla query string
             query_alias = req.params.get('t_alias_generated')
@@ -96,33 +96,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            #request_user = users_collection.find_one({"t_alias_generated": query_alias})
+            request_user = users_collection.find_one({"t_alias_generated": query_alias})
             # Verifica se l'utente esiste
-            #user_verify = user_verify_collection.find_one({"t_username": request_user.get("t_username")})
-            user_verify = {"id":"test"}
+            user_verify = user_verify_collection.find_one({"t_username": request_user.get("t_username")})
             if user_verify:
-                # Prepara la risposta
-                # user_data = {
-                #     "t_username": user_verify.get('t_username'),
-                #     "name": user_verify.get('name'),
-                #     "surname": user_verify.get('surname'),
-                #     "birthdate": user_verify.get('birthdate'),
-                #     "pIva": user_verify.get('pIva'),
-                #     "companyName": user_verify.get('companyName'),
-                #     "companyAddress": user_verify.get('companyAddress'),
-                #     "pec": user_verify.get('pec'),
-                #     "consentClauses": user_verify.get('consentClauses'),
-                #     "identity_document": user_verify.get('identity_document'),
-                #     "status": user_verify.get('status'),
-                #     "refused_date": user_verify.get('refused_date')
-                # }
-
-                randomNumber = random()
+                #Prepara la risposta
                 user_data = {
-                    "status": "verified" if (1 >= randomNumber >= 0.8) else "requested" if (
-                                0.8 >= randomNumber >= 0.6) else "refused" if (
-                                0.6 >= randomNumber >= 0.5) else "not-verified"
+                    "t_username": user_verify.get('t_username'),
+                    "name": user_verify.get('name'),
+                    "surname": user_verify.get('surname'),
+                    "birthdate": user_verify.get('birthdate'),
+                    "pIva": user_verify.get('pIva'),
+                    "companyName": user_verify.get('companyName'),
+                    "companyAddress": user_verify.get('companyAddress'),
+                    "pec": user_verify.get('pec'),
+                    "consentClauses": user_verify.get('consentClauses'),
+                    "identity_document": user_verify.get('identity_document'),
+                    "status": user_verify.get('status'),
+                    "refused_date": user_verify.get('refused_date')
                 }
+
                 return func.HttpResponse(
                     body=json.dumps(user_data),
                     status_code=200,

@@ -72,115 +72,12 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 )
 
             # Cerca gli utenti corrispondenti al parametro t_alias_generated_liked
-            # if t_alias_generated_liked:
-            #     users_info = search_users_by_alias_liked(t_alias_generated_liked)
-            # else:
-            #     return func.HttpResponse(
-            #         status_code=404
-            #     )
-            
-            users_info = [
-                {
-                    "t_username": "johndoe",
-                    "t_name": "John",
-                    "t_surname": "Doe",
-                    "t_alias_generated": "JD",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": False,
-                    "t_type": "CREATOR"
-                },
-                {
-                    "t_username": "mariobaldi",
-                    "t_name": "Mario",
-                    "t_surname": "Baldi",
-                    "t_alias_generated": "MarioB",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": True,
-                    "t_type": "ARTIST"
-                },
-                {
-                    "t_username": "janesmith",
-                    "t_name": "Jane",
-                    "t_surname": "Smith",
-                    "t_alias_generated": "JS",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": False,
-                    "t_type": "CREATOR"
-                },
-                {
-                    "t_username": "lucabianchi",
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "LB",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": True,
-                    "t_type": "ARTIST"
-                },
-                {
-                    "t_username": "alicegreen",
-                    "t_name": "Alice",
-                    "t_surname": "Green",
-                    "t_alias_generated": "AGreen",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": False,
-                    "t_type": "CREATOR"
-                },
-                {
-                    "t_username": "marcobello",
-                    "t_name": "Marco",
-                    "t_surname": "Bello",
-                    "t_alias_generated": "MBello",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": True,
-                    "t_type": "ARTIST"
-                },
-                {
-                    "t_username": "emilywhite",
-                    "t_name": "Emily",
-                    "t_surname": "White",
-                    "t_alias_generated": "EWhite",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": False,
-                    "t_type": "CREATOR"
-                },
-                {
-                    "t_username": "giorgioparis",
-                    "t_name": "Giorgio",
-                    "t_surname": "Paris",
-                    "t_alias_generated": "GParis",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": True,
-                    "t_type": "ARTIST"
-                },
-                {
-                    "t_username": "annagold",
-                    "t_name": "Anna",
-                    "t_surname": "Gold",
-                    "t_alias_generated": "AGold",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": False,
-                    "t_type": "CREATOR"
-                },
-                {
-                    "t_username": "paolored",
-                    "t_name": "Paolo",
-                    "t_surname": "Red",
-                    "t_alias_generated": "PRed",
-                    "t_description": "Lorem ipsum dolor sit amet.",
-                    "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                    "is_verified": True,
-                    "t_type": "ARTIST"
-                }
-            ]
+            if t_alias_generated_liked:
+                users_info = search_users_by_alias_liked(t_alias_generated_liked)
+            else:
+                return func.HttpResponse(
+                    status_code=404
+                )
 
             if users_info:
                 # Costruisci il corpo della risposta come oggetto JSON

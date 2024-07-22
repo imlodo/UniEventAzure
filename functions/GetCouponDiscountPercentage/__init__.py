@@ -84,20 +84,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Cerca il coupon nel database
-            #coupon = event_coupon_collection.find_one({"event_id": event_id, "coupon_code": coupon_code})
-            coupon = None
-            if coupon_code == "SUMMER21":
-                coupon = {
-                    "coupon_id":"asdasda7338322",
-                    "event_id": "event123",
-                    "coupon_code": "SUMMER21",
-                    "discount": 20
-                }
-
+            coupon = event_coupon_collection.find_one({"event_id": event_id, "coupon_code": coupon_code})
             if coupon:
                 # Prepara la risposta
                 coupon_data = {
-                    "coupon_id": str(coupon.get('_id')), 
+                    "coupon_id": str(coupon.get('_id')),
                     "event_id": coupon.get('event_id'),
                     "coupon_code": coupon.get('coupon_code'),
                     "discount": coupon.get('discount')

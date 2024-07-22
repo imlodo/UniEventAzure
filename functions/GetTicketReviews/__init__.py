@@ -59,43 +59,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             if use_username:
                 # Recupera la recensione specifica se viene passato username e t_ticket_id
-                #review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ticket_id}, {"_id": 0})
-                review = {
-                    "t_username": "user123",
-                    "t_ticket_id": "ABC123",
-                    "t_title": "Esperienza fantastica",
-                    "t_body": "Il concerto è stato incredibile. L'atmosfera era elettrizzante e la performance indimenticabile.",
-                    "n_star": 4.5,
-                    "review_date": "2023-06-20",
-                    "created_date": "2023-06-21"
-                }
+                review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ticket_id}, {"_id": 0})
                 if review:
                     return func.HttpResponse(body=json.dumps(review), status_code=200, mimetype='application/json')
                 else:
                     return func.HttpResponse("Nessuna recensione trovata per questo biglietto e utente.", status_code=404)
             else:
                 # Recupera la lista delle recensioni per un determinato biglietto se viene passato solo t_ticket_id
-                #reviews = list(reviews_collection.find({"t_ticket_id": ticket_id}, {"_id": 0}))
-                reviews = [
-                    {
-                        "t_username": "user123",
-                        "t_ticket_id": "ABC123",
-                        "t_title": "Esperienza fantastica",
-                        "t_body": "Il concerto è stato incredibile.",
-                        "n_star": 4.5,
-                        "review_date": "2023-06-20",
-                        "created_date": "2023-06-21"
-                    },
-                    {
-                        "t_username": "user456",
-                        "t_ticket_id": "ABC123",
-                        "t_title": "Buona organizzazione",
-                        "t_body": "Tutto ben organizzato e pulito.",
-                        "n_star": 4.0,
-                        "review_date": "2023-06-20",
-                        "created_date": "2023-06-21"
-                    }
-                ]
+                reviews = list(reviews_collection.find({"t_ticket_id": ticket_id}, {"_id": 0}))
                 if reviews:
                     return func.HttpResponse(body=json.dumps(reviews), status_code=200, mimetype='application/json')
                 else:

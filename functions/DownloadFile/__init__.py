@@ -2,7 +2,7 @@ import logging
 import os
 import json
 import jwt
-import uuid
+from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 import azure.functions as func
 
@@ -50,38 +50,36 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
             container_name = os.getenv('AZURE_STORAGE_CONTAINER_NAME')
 
-            # Parse the request to get the file
-            file = req.files['file']
-            file_name = file.filename
-            file_data = file.stream.read()
+            # Parse the request to get the blob name
+            req_body = req.get_json()
+            blob_name = req_body.get('blob_name')
+
+            if not blob_name:
+                return func.HttpResponse(
+                    "Il nome del blob è richiesto.",
+                    status_code=400
+                )
 
             # Create a blob client
             blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
-            # Generate a new blob name if it already exists
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=file_name)
-            if blob_client.exists():
-                # Generate a new unique name for the blob
-                unique_suffix = str(uuid.uuid4())
-                file_name = f"{file_name}_{unique_suffix}"
+            # Download the blob
+            download_stream = blob_client.download_blob()
+            blob_data = download_stream.readall()
 
-                # Create a new blob client with the unique name
-                blob_client = blob_service_client.get_blob_client(container=container_name, blob=file_name)
-
-            # Upload the file to Azure Blob Storage
-            blob_client.upload_blob(file_data, overwrite=True)
-
-            # Get the URL of the uploaded blob
-            blob_url = blob_client.url
-
+            # Return the file as a response
             return func.HttpResponse(
-                body=json.dumps({"message": f"File {file_name} uploaded successfully.", "url": blob_url, "fileName": file_name}),
+                body=blob_data,
                 status_code=200,
-                mimetype="application/json"
+                mimetype="application/octet-stream",
+                headers={
+                    'Content-Disposition': f'attachment; filename={blob_name}'
+                }
             )
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
-            return func.HttpResponse("Error uploading file.", status_code=500)
+            return func.HttpResponse("Error downloading file.", status_code=500)
     else:
         return func.HttpResponse(
             "Metodo non supportato. Utilizzare il metodo POST.",

@@ -41,8 +41,7 @@ def get_user_info(t_alias_generated):
 # Funzione per ottenere i contenuti dell'utente (ultimi 5)
 def get_user_content(t_alias_generated, limit=5):
     contents = content_collection.find({"t_alias_generated": t_alias_generated}).sort("created_date",
-                                                                                             pymongo.DESCENDING).limit(
-        limit)
+                                                                                      pymongo.DESCENDING).limit(limit)
     content_list = []
     for content in contents:
         if '_id' in content:
@@ -122,12 +121,12 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Ottieni l'alias dall'URL della richiesta
             t_alias_generated = req.params.get('t_alias_generated')
-            #user = users_collection.find_one({"t_alias_generated": t_alias_generated})
-            # if not user:
-            #     return HttpResponse(
-            #         "User non trovato",
-            #         status_code=404
-            #     )
+            user = users_collection.find_one({"t_alias_generated": t_alias_generated})
+            if not user:
+                return HttpResponse(
+                    "User non trovato",
+                    status_code=404
+                )
             if not t_alias_generated:
                 return HttpResponse(
                     "Parametro t_alias_generated mancante.",
@@ -135,295 +134,19 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 )
 
             # Ottieni le informazioni dell'utente dal database
-            # user_info = get_user_info(t_alias_generated)
-            # if not user_info:
-            #     return HttpResponse(status_code=404)
+            user_info = get_user_info(t_alias_generated)
+            if not user_info:
+                return HttpResponse(status_code=404)
 
             # Ottieni i contenuti dell'utente dal database (ultimi 5)
-            # content_list = get_user_content(t_alias_generated)
-            # booked_list = get_user_booked_content(user.get("t_username"))
-            # liked_list = get_user_liked_content(t_alias_generated)
-
-            content_list = [
-                {
-                    "id": 123,
-                    "t_caption": "Conferenza Dinamica",
-                    "t_image_link": "http://localhost:4200/assets/img/topic-image-placeholder.jpg",
-                    "t_user": {
-                        "_id": "012933923", "t_username": "johndoe", "t_password": "hashed_password",
-                        "t_name": "John", "t_surname": "Doe", "t_alias_generated": "JD",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 4748049,
-                    "type": "Topics",
-                    "created_date": "2024-06-23T09:55:14.998Z"
-                },
-                {
-                    "id": 144,
-                    "t_caption": "Concerto Epico",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-07-23",
-                    "t_user": {
-                        "_id": "012933923", "t_username": "johndoe", "t_password": "hashed_password",
-                        "t_name": "John", "t_surname": "Doe", "t_alias_generated": "JD",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 359089,
-                    "type": "Eventi",
-                    "created_date": "2024-07-23",
-                    "event_first_date": "2024-07-23",
-                    "event_last_date": "2024-07-26",
-                },
-                {
-                    "id": 146,
-                    "t_caption": "Come accedere ad Unisa?",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleTopicImageFristFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleTopicsVideo.mp4",
-                    "t_user": {
-                        "_id": "012933923", "t_username": "johndoe", "t_password": "hashed_password",
-                        "t_name": "John", "t_surname": "Doe", "t_alias_generated": "JD",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 159089,
-                    "type": "Topics",
-                    "created_date": "2024-07-23",
-                },
-                {
-                    "id": 148,
-                    "t_caption": "La black",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-07-23",
-                    "t_user": {
-                        "_id": "012933923", "t_username": "johndoe", "t_password": "hashed_password",
-                        "t_name": "John", "t_surname": "Doe", "t_alias_generated": "JD",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 759089,
-                    "type": "Eventi",
-                    "created_date": "2024-07-23",
-                    "event_first_date": "2024-07-23",
-                    "event_last_date": "2024-07-26",
-                },
-                {
-                    "id": 152,
-                    "t_caption": "La black, il ritorno di mario baldi",
-                    "t_image_link": "http://localhost:4200/assets/img/event-image-placeholder.jpg",
-                    "t_event_date": "2024-07-23",
-                    "t_user": {
-                        "_id": "012933923", "t_username": "johndoe", "t_password": "hashed_password",
-                        "t_name": "John", "t_surname": "Doe", "t_alias_generated": "JD",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 359089,
-                    "type": "Eventi",
-                    "created_date": "2024-07-23",
-                    "event_first_date": "2024-07-23",
-                    "event_last_date": "2024-07-26",
-                }
-            ]
-            booked_list = [
-                {
-                    "id": 150,
-                    "t_caption": "Tecniche di Pittura",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleTopicImageFristFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleTopicsVideo.mp4",
-                    "t_user": {
-                        "_id": "012933928", "t_username": "artlover", "t_password": "hashed_password",
-                        "t_name": "Art", "t_surname": "Lover", "t_alias_generated": "artlover",
-                        "t_description": "Amante delle belle arti e della pittura.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 120034,
-                    "type": "Topics",
-                    "created_date": "2024-08-25",
-                },
-                {
-                    "id": 151,
-                    "t_caption": "Incontro con lo Scrittore",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-09-20",
-                    "t_user": {
-                        "_id": "012933929", "t_username": "bookworm", "t_password": "hashed_password",
-                        "t_name": "Book", "t_surname": "Worm", "t_alias_generated": "bookworm",
-                        "t_description": "Avido lettore e critico letterario.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/example_artist_image.jpg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 230987,
-                    "type": "Eventi",
-                    "created_date": "2024-09-10",
-                    "event_first_date": "2024-09-20",
-                    "event_last_date": "2024-09-22",
-                },
-                {
-                    "id": 153,
-                    "t_caption": "Lezioni di Chitarra",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleTopicImageFristFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleTopicsVideo.mp4",
-                    "t_user": {
-                        "_id": "012933930", "t_username": "guitarhero", "t_password": "hashed_password",
-                        "t_name": "Guitar", "t_surname": "Hero", "t_alias_generated": "guitarhero",
-                        "t_description": "Chitarrista esperto e insegnante di musica.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": True, "t_type": "ARTIST"
-                    },
-                    "n_click": 340000,
-                    "type": "Topics",
-                    "created_date": "2024-10-01",
-                },
-                {
-                    "id": 144,
-                    "t_caption": "Raduno magico",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-07-23",
-                    "t_user": {
-                        "_id": "012933924", "t_username": "mariobaldi", "t_password": "hashed_password",
-                        "t_name": "Mario", "t_surname": "Baldi", "t_alias_generated": "mariobaldi",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": True, "t_type": "ARTIST"
-                    },
-                    "n_click": 359089,
-                    "type": "Eventi",
-                    "created_date": "2024-07-23",
-                    "event_first_date": "2024-07-23",
-                    "event_last_date": "2024-07-26",
-                },
-                {
-                    "id": 149,
-                    "t_caption": "Festa del Cinema",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-08-01",
-                    "t_user": {
-                        "_id": "012933927", "t_username": "cinemafan", "t_password": "hashed_password",
-                        "t_name": "Cine", "t_surname": "Fan", "t_alias_generated": "cinemafan",
-                        "t_description": "Appassionato di cinema e film d'autore.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/example_artist_image.jpg",
-                        "is_verified": True, "t_type": "CREATOR"
-                    },
-                    "n_click": 482000,
-                    "type": "Eventi",
-                    "created_date": "2024-07-30",
-                    "event_first_date": "2024-08-01",
-                    "event_last_date": "2024-08-05",
-                }
-            ]
-            liked_list = [
-                {
-                    "id": 144,
-                    "t_caption": "Raduno magico",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-07-23",
-                    "t_user": {
-                        "_id": "012933924", "t_username": "mariobaldi", "t_password": "hashed_password",
-                        "t_name": "Mario", "t_surname": "Baldi", "t_alias_generated": "mariobaldi",
-                        "t_description": "Lorem ipsum dolor sit amet.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": True, "t_type": "ARTIST"
-                    },
-                    "n_click": 359089,
-                    "type": "Eventi",
-                    "created_date": "2024-07-23",
-                    "event_first_date": "2024-07-23",
-                    "event_last_date": "2024-07-26",
-                },
-                {
-                    "id": 149,
-                    "t_caption": "Festa del Cinema",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-08-01",
-                    "t_user": {
-                        "_id": "012933927", "t_username": "cinemafan", "t_password": "hashed_password",
-                        "t_name": "Cine", "t_surname": "Fan", "t_alias_generated": "cinemafan",
-                        "t_description": "Appassionato di cinema e film d'autore.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/example_artist_image.jpg",
-                        "is_verified": True, "t_type": "CREATOR"
-                    },
-                    "n_click": 482000,
-                    "type": "Eventi",
-                    "created_date": "2024-07-30",
-                    "event_first_date": "2024-08-01",
-                    "event_last_date": "2024-08-05",
-                },
-                {
-                    "id": 150,
-                    "t_caption": "Tecniche di Pittura",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleTopicImageFristFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleTopicsVideo.mp4",
-                    "t_user": {
-                        "_id": "012933928", "t_username": "artlover", "t_password": "hashed_password",
-                        "t_name": "Art", "t_surname": "Lover", "t_alias_generated": "artlover",
-                        "t_description": "Amante delle belle arti e della pittura.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 120034,
-                    "type": "Topics",
-                    "created_date": "2024-08-25",
-                },
-                {
-                    "id": 151,
-                    "t_caption": "Incontro con lo Scrittore",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleEventFirstFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleEventVideo.mp4",
-                    "t_event_date": "2024-09-20",
-                    "t_user": {
-                        "_id": "012933929", "t_username": "bookworm", "t_password": "hashed_password",
-                        "t_name": "Book", "t_surname": "Worm", "t_alias_generated": "bookworm",
-                        "t_description": "Avido lettore e critico letterario.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/example_artist_image.jpg",
-                        "is_verified": False, "t_type": "CREATOR"
-                    },
-                    "n_click": 230987,
-                    "type": "Eventi",
-                    "created_date": "2024-09-10",
-                    "event_first_date": "2024-09-20",
-                    "event_last_date": "2024-09-22",
-                },
-                {
-                    "id": 153,
-                    "t_caption": "Lezioni di Chitarra",
-                    "t_image_link": "http://localhost:4200/assets/img/exampleTopicImageFristFrame.png",
-                    "t_video_link": "http://localhost:4200/assets/videos/exampleTopicsVideo.mp4",
-                    "t_user": {
-                        "_id": "012933930", "t_username": "guitarhero", "t_password": "hashed_password",
-                        "t_name": "Guitar", "t_surname": "Hero", "t_alias_generated": "guitarhero",
-                        "t_description": "Chitarrista esperto e insegnante di musica.",
-                        "t_profile_photo": "http://localhost:4200/assets/img/userExampleImg.jpeg",
-                        "is_verified": True, "t_type": "ARTIST"
-                    },
-                    "n_click": 340000,
-                    "type": "Topics",
-                    "created_date": "2024-10-01",
-                }
-            ]
+            content_list = get_user_content(t_alias_generated)
+            booked_list = get_user_booked_content(user.get("t_username"))
+            liked_list = get_user_liked_content(t_alias_generated)
 
             # Ottieni i conteggi
-            # count_followed = get_count_followed(t_alias_generated)
-            # count_follower = get_count_follower(t_alias_generated)
-            # count_like = get_count_like(t_alias_generated)
-
-            count_followed = 4471
-            count_follower = 6211
-            count_like = 8439
+            count_followed = get_count_followed(t_alias_generated)
+            count_follower = get_count_follower(t_alias_generated)
+            count_like = get_count_like(t_alias_generated)
 
             # Costruisci l'oggetto UserProfileInfo
             user_profile_info = {
@@ -433,7 +156,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 "countFollowed": count_followed,
                 "countFollower": count_follower,
                 "countLike": count_like,
-                "isPublic": True  # user_info.get("is_public", True)
+                "isPublic": user_info.get("is_public", True)
             }
 
             # Costruisci il corpo della risposta come oggetto JSON

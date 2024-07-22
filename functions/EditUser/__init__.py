@@ -1,36 +1,30 @@
 import logging
 import os
-from random import random
-
-import pymongo
+import json
 import jwt
-from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 import azure.functions as func
-from werkzeug.security import generate_password_hash
-import json
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
-
 client = MongoClient(connectString)
-
-# Seleziona il database
 db = client.unieventmongodb
-
-# Seleziona la collezione (crea la collezione se non esiste)
 users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
-
 def update_user_info(t_username, updates):
     result = users_collection.update_one({"t_username": t_username}, {"$set": updates})
     return result.modified_count > 0
 
+def get_user_password_hash(t_username):
+    user = users_collection.find_one({"t_username": t_username})
+    if user:
+        return user.get('t_password')
+    return None
 
-# Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -41,12 +35,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not auth_header or not auth_header.startswith('Bearer '):
                 return func.HttpResponse(
                     "Autorizzazione non valida.",
-                    status_code=404
+                    status_code=401
                 )
 
             jwt_token = auth_header.split(' ')[1]
-
-            # Decodifica il token JWT
             secret_key = os.getenv('JWT_SECRET_KEY')
 
             try:
@@ -54,12 +46,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             except jwt.ExpiredSignatureError:
                 return func.HttpResponse(
                     "Token scaduto.",
-                    status_code=404
+                    status_code=401
                 )
             except jwt.InvalidTokenError:
                 return func.HttpResponse(
                     "Token non valido.",
-                    status_code=404
+                    status_code=401
                 )
 
             # Ottieni l'ID utente dal token decodificato
@@ -67,7 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not t_username:
                 return func.HttpResponse(
                     "Token non contiene un username valido.",
-                    status_code=404
+                    status_code=401
                 )
 
             # Prova a ottenere i dati JSON dal corpo della richiesta
@@ -94,6 +86,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
+            # Verifica la password attuale se è fornita
+            if t_actual_password:
+                stored_password_hash = get_user_password_hash(t_username)
+                if not stored_password_hash or not check_password_hash(stored_password_hash, t_actual_password):
+                    return func.HttpResponse(
+                        "La password attuale fornita non è corretta.",
+                        status_code=401
+                    )
+
             # Crea un dizionario per gli aggiornamenti
             updates = {}
             if t_name:
@@ -104,14 +105,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 updates['t_description'] = t_description
             if t_profile_photo:
                 updates['t_profile_photo'] = t_profile_photo
-            #if t_actual_password:
-             #fare controllo se la actual password corrisponde a quella memorizzata nel db altrimenti restituire errore
             if t_password:
                 updates['t_password'] = generate_password_hash(t_password)
 
             # Esegui l'aggiornamento nel database
-            # update_user_info(t_username, updates):
-            if random() > 0.5:
+            if update_user_info(t_username, updates):
                 response_body = json.dumps({"message": "Informazioni utente aggiornate con successo."})
                 return func.HttpResponse(
                     body=response_body,

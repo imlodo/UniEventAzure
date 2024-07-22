@@ -73,7 +73,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             t_alias_generated_from = req_body.get('t_alias_generated_from')
             t_alias_generated_to = req_body.get('t_alias_generated_to')
 
-
             if not t_alias_generated_from or not t_alias_generated_to:
                 return func.HttpResponse(
                     "Inserire t_alias_generated_from e t_alias_generated_to nel corpo della richiesta.",
@@ -81,12 +80,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Verifica se l'utente 'from' segue l'utente 'to'
-            #follow_record = follow_user_collection.find_one({
-            #    "t_alias_generated_from": t_alias_generated_from,
-            #    "t_alias_generated_to": t_alias_generated_to
-            #})
+            follow_record = follow_user_collection.find_one({
+                "t_alias_generated_from": t_alias_generated_from,
+                "t_alias_generated_to": t_alias_generated_to
+            })
 
-            if random() > 0.5:
+            if follow_record:
                 return func.HttpResponse(
                     body=json.dumps({"follows": True, "message": "L'utente segue l'altro utente."}),
                     status_code=200,

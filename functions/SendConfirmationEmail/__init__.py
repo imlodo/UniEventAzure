@@ -64,12 +64,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not username:
             return func.HttpResponse("Username is required.", status_code=400)
 
-        # user = users_collection.find_one({"t_username": username})
-        # if not user:
-        #     return func.HttpResponse("User not found.", status_code=404)
-        # 
-        # email = user.get('t_email')
-        email = "anoloc@live.it"
+        user = users_collection.find_one({"t_username": username})
+        if not user:
+            return func.HttpResponse("User not found.", status_code=404)
+
+        email = user.get('t_email')
         if not email:
             return func.HttpResponse("User does not have an email address.", status_code=400)
 

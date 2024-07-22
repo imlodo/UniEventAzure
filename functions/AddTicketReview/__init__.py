@@ -86,19 +86,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             }
 
             # Cerca se esiste già una recensione per l'utente e il biglietto
-            #existing_review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ticket_id})
+            existing_review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ticket_id})
 
-            #if existing_review:
-            if random() > 0.5:
+            if existing_review:
                 # Aggiorna la recensione esistente
-                # reviews_collection.update_one(
-                #     {"t_username": username, "t_ticket_id": ticket_id},
-                #     {"$set": review}
-                # )
+                reviews_collection.update_one(
+                    {"t_username": username, "t_ticket_id": ticket_id},
+                    {"$set": review}
+                )
                 response_message = "Recensione aggiornata con successo."
             else:
                 # Inserisce una nuova recensione
-                #reviews_collection.insert_one(review)
+                reviews_collection.insert_one(review)
                 response_message = "Recensione aggiunta con successo."
 
             response_body = json.dumps({"message": response_message})

@@ -74,20 +74,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not username:
             return func.HttpResponse("Token does not contain a valid username.", status_code=401)
 
-        # user = users_collection.find_one({"t_username": username})
-        # if not user:
-        #     return func.HttpResponse("User not found.", status_code=404)
+        user = users_collection.find_one({"t_username": username})
+        if not user:
+            return func.HttpResponse("User not found.", status_code=404)
 
         new_password = generate_new_password()
         hashed_password = generate_password_hash(new_password)
 
-        # users_collection.update_one(
-        #     {"t_username": username},
-        #     {"$set": {"t_password": hashed_password}}
-        # )
+        users_collection.update_one(
+            {"t_username": username},
+            {"$set": {"t_password": hashed_password}}
+        )
 
-        # email = user['t_email']
-        email = "anoloc@live.it"
+        email = user['t_email']
         send_reset_password_email(email, new_password)
         response_body = json.dumps(
             {"message": "Password resettata correttamente. Verifica la tua email per la nuova password."})

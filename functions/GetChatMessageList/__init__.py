@@ -56,211 +56,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse("Alias target non fornito.", status_code=400)
 
         # Recupera i messaggi dal database per l'utente corrente e l'utente target
-        # messages = messages_collection.find(
-        #     {"$or": [
-        #         {"$and": [{"user_to": username}, {"user_at": target_alias}]},
-        #         {"$and": [{"user_at": username}, {"user_to": target_alias}]}
-        #     ]}
-        # ).sort("dateTime", -1)
-        # 
-        # # Creazione della lista dei messaggi
-        # messages_list = []
-        # for message in messages:
-        #     user_to = users_collection.find_one({"username": message["user_to"]})
-        #     user_at = users_collection.find_one({"username": message["user_at"]})
-        # 
-        #     if not user_to or not user_at:
-        #         continue
-        # 
-        #     messages_list.append({
-        #         "user_to": user_to,
-        #         "user_at": user_at,
-        #         "message": message["message"],
-        #         "dateTime": message["dateTime"]
-        #     })
+        messages = messages_collection.find(
+            {"$or": [
+                {"$and": [{"user_to": username}, {"user_at": target_alias}]},
+                {"$and": [{"user_at": username}, {"user_to": target_alias}]}
+            ]}
+        ).sort("dateTime", -1)
 
-        messages_list = [
-            {
-                "user_from": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "user_at": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "message": "Ciao Marco!",
-                "dateTime": "2024-06-20T10:30:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "user_at": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "message": "Ciao Luca!",
-                "dateTime": "2024-06-20T11:00:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "user_at": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "message": "Come stai?",
-                "dateTime": "2024-06-21T10:30:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "user_at": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "message": "Sto bene, grazie!",
-                "dateTime": "2024-06-21T11:00:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "user_at": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "message": "Hai visto l'ultimo film?",
-                "dateTime": "2024-06-22T10:30:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "user_at": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "message": "Sì, è stato fantastico!",
-                "dateTime": "2024-06-22T11:00:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "user_at": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "message": "Hai novità?",
-                "dateTime": "2024-06-23T10:30:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "user_at": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "message": "Niente di nuovo!",
-                "dateTime": "2024-06-23T11:00:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "user_at": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "message": "Andiamo a bere qualcosa stasera?",
-                "dateTime": "2024-06-24T10:30:00Z"
-            },
-            {
-                "user_from": {
-                    "t_name": "Marco",
-                    "t_surname": "Rossi",
-                    "t_alias_generated": target_alias,
-                    "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-                    "t_type": "ARTIST"
-                },
-                "user_at": {
-                    "t_name": "Luca",
-                    "t_surname": "Bianchi",
-                    "t_alias_generated": "JD",
-                    "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-                    "t_type": "CREATOR"
-                },
-                "message": "Certo, ci vediamo alle 8!",
-                "dateTime": "2024-06-24T11:00:00Z"
-            }
-        ]
+        # Creazione della lista dei messaggi
+        messages_list = []
+        for message in messages:
+            user_to = users_collection.find_one({"username": message["user_to"]})
+            user_at = users_collection.find_one({"username": message["user_at"]})
+
+            if not user_to or not user_at:
+                continue
+
+            messages_list.append({
+                "user_to": user_to,
+                "user_at": user_at,
+                "message": message["message"],
+                "dateTime": message["dateTime"]
+            })
+
         response_body = json.dumps(messages_list, default=str)
         return func.HttpResponse(response_body, mimetype="application/json", status_code=200)
 

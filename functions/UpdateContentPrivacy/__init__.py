@@ -84,34 +84,34 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Ottieni il contenuto e l'utente creatore
-            # content = content_collection.find_one({"_id": content_id})
-            # if not content:
-            #     return func.HttpResponse(
-            #         "Contenuto non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
+            content = content_collection.find_one({"_id": content_id})
+            if not content:
+                return func.HttpResponse(
+                    "Contenuto non trovato.",
+                    status_code=404
+                )
 
-            # # Controlla se l'utente è il creatore del contenuto
-            # if content.get('t_alias_generated') != user.get('t_alias_generated'):
-            #     return func.HttpResponse(
-            #         "L'utente non è autorizzato a modificare questo contenuto.",
-            #         status_code=403
-            #     )
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
 
-            # # Aggiorna il t_privacy del contenuto
-            # result = content_collection.update_one(
-            #     {"_id": content_id},
-            #     {"$set": {"t_privacy": new_privacy}}
-            # )
+            # Controlla se l'utente è il creatore del contenuto
+            if content.get('t_alias_generated') != user.get('t_alias_generated'):
+                return func.HttpResponse(
+                    "L'utente non è autorizzato a modificare questo contenuto.",
+                    status_code=403
+                )
 
-            if random.random() > 0.5: #result.modified_count == 1:
+            # Aggiorna il t_privacy del contenuto
+            result = content_collection.update_one(
+                {"_id": content_id},
+                {"$set": {"t_privacy": new_privacy}}
+            )
+
+            if result.modified_count == 1:
                 return func.HttpResponse(
                     json.dumps({"message": "t_privacy aggiornato con successo."}),
                     status_code=200,

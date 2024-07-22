@@ -105,10 +105,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "status": "REQUESTED",
                 "timestamp": datetime.utcnow()
             }
-            #requests_collection.insert_one(request_data)
+            requests_collection.insert_one(request_data)
 
             # Invoca la funzione per creare il file di dati personali
-            #create_personal_data_file(username, type_download, type_data_download)
+            create_personal_data_file(username, type_download, type_data_download)
 
             response_body = json.dumps({"message": "Richiesta di dati personali inviata con successo."})
             return func.HttpResponse(body=response_body, status_code=200, mimetype='application/json')

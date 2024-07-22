@@ -79,11 +79,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Inserimento del nuovo record nella collezione FollowUser
-            #follow_user_collection.insert_one({
-            #   "t_alias_generated_from": t_alias_generated_from,
-            #  "t_alias_generated_to": t_alias_generated_to,
-            # "follow_date": datetime.utcnow()
-            #})
+            follow_user_collection.insert_one({
+                "t_alias_generated_from": t_alias_generated_from,
+                "t_alias_generated_to": t_alias_generated_to,
+                "follow_date": datetime.utcnow()
+            })
 
             return func.HttpResponse(
                 body=json.dumps({"message": "Utente seguito con successo."}),

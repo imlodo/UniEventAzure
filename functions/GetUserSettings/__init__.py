@@ -107,52 +107,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Recupera le impostazioni utente dal database
             try:
-                # settings = get_user_settings(t_username, setting_type)
-                # INIZIO MOCK - Mock settings
-                settings = {
-                    "privacy": {
-                        "messages": {
-                            "all_user_send_message": True
-                        },
-                        "visibility": {
-                            "private_account": random.random() > 0.5,
-                            "show_booked": random.random() > 0.5
-                        }
-                    },
-                    "notification": {
-                        "desktop": {
-                            "browser_consent": True
-                        },
-                        "interaction": {
-                            "like": False,
-                            "comments": True,
-                            "tag": False,
-                            "new_follower_request": True,
-                            "follower_suggest": False,
-                            "terms_and_condition": True,
-                            "payments": False,
-                            "tickets": True
-                        }
-                    }
-                }
-
-                # If a specific setting_type is provided, filter the mock settings
-                if setting_type:
-                    if setting_type.startswith("INTERACTION"):
-                        settings = {key: value for key, value in settings['notification']['interaction'].items() if
-                                    key.startswith(setting_type.split('_')[1].lower())}
-                    else:
-                        setting_path = SETTINGS_MAPPING.get(setting_type)
-                        if not setting_path:
-                            raise ValueError(f"Invalid setting type: {setting_type}")
-                        keys = setting_path.split('.')
-                        filtered_setting = settings
-                        for key in keys:
-                            filtered_setting = filtered_setting.get(key)
-                            if filtered_setting is None:
-                                break
-                        settings = {setting_path: filtered_setting}
-                #FINE MOCK
+                settings = get_user_settings(t_username, setting_type)
 
                 return func.HttpResponse(
                     body=json.dumps(settings),

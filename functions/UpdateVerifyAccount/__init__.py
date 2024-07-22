@@ -63,14 +63,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=401
                 )
 
-            # user = users_collection.find_one({"t_username": t_username})
+            user = users_collection.find_one({"t_username": t_username})
 
-            # Controlla il ruolo dell'utente
-            # if user.get("t_role") == "Utente":
-            #     return func.HttpResponse(
-            #         "Non autorizzato a modificare lo stato delle richieste.",
-            #         status_code=403
-            #     )
+            #Controlla il ruolo dell'utente
+            if user.get("t_role") == "Utente":
+                return func.HttpResponse(
+                    "Non autorizzato a modificare lo stato delle richieste.",
+                    status_code=403
+                )
 
             # Prova a ottenere i dati JSON dal corpo della richiesta
             try:
@@ -93,14 +93,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # Trova la richiesta di verifica
-            # verify_request = user_verify_collection.find_one({"_id": pymongo.ObjectId(request_id)})
-            # 
-            # if not verify_request:
-            #     return func.HttpResponse(
-            #         "Richiesta di verifica non trovata.",
-            #         status_code=404
-            #     )
+            #Trova la richiesta di verifica
+            verify_request = user_verify_collection.find_one({"_id": pymongo.ObjectId(request_id)})
+
+            if not verify_request:
+                return func.HttpResponse(
+                    "Richiesta di verifica non trovata.",
+                    status_code=404
+                )
 
             # Aggiorna lo stato della richiesta
             if t_state == "refused":
@@ -113,11 +113,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 update_fields = {
                     "status": t_state
                 }
-                # Aggiorna anche il t_type dell'utente
-                # users_collection.update_one(
-                #     {"t_username": verify_request.get("t_username")},
-                #     {"$set": {"t_type": "ARTIST", "is_verified":True}}
-                # )
+                #Aggiorna anche il t_type dell'utente
+                users_collection.update_one(
+                    {"t_username": verify_request.get("t_username")},
+                    {"$set": {"t_type": "ARTIST", "is_verified": True}}
+                )
             else:
                 return func.HttpResponse(
                     "Stato non valido.",
@@ -125,7 +125,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Esegui l'aggiornamento della richiesta
-            # user_verify_collection.update_one({"_id": pymongo.ObjectId(request_id)}, {"$set": update_fields})
+            user_verify_collection.update_one({"_id": pymongo.ObjectId(request_id)}, {"$set": update_fields})
 
             return func.HttpResponse(
                 json.dumps({"message": "Stato della richiesta aggiornato con successo."}),

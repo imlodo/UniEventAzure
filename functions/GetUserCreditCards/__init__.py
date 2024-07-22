@@ -53,30 +53,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not t_username:
                 return func.HttpResponse("Token non valido.", status_code=401)
 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
 
-            # t_alias_generated = user.get('t_alias_generated')
-            # 
-            # user_cards = list(user_cards_collection.find({"t_alias_generated": t_alias_generated}))
+            t_alias_generated = user.get('t_alias_generated')
 
-            user_cards = [
-                {
-                    "card_id": "sdasdas",
-                    "cardName": "Visa",
-                    "cardNumber": mask_card("4111111111111111"),
-                    "expiryDate": "12/25",
-                    "cvv": "123"
-                },
-                {
-                    "card_id": "sdasdas",
-                    "cardName": "MasterCard",
-                    "cardNumber": mask_card("5500000000000004"),
-                    "expiryDate": "11/24",
-                    "cvv": "456"
-                }
-            ]
+            user_cards = list(user_cards_collection.find({"t_alias_generated": t_alias_generated}))
 
             return func.HttpResponse(
                 body=json.dumps(user_cards),

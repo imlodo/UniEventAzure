@@ -117,39 +117,39 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Dati mancanti per il messaggio.", status_code=400)
 
             # Recupera l'utente di destinazione dal database tramite l'alias generato
-            # user_at = users_collection.find_one({"t_alias_generated": alias_generated})
-            # if not user_at:
-            #     return func.HttpResponse("Utente destinatario non trovato.", status_code=404)
+            user_at = users_collection.find_one({"t_alias_generated": alias_generated})
+            if not user_at:
+                return func.HttpResponse("Utente destinatario non trovato.", status_code=404)
 
-            # is_account_private_bool = is_account_private(user_at['t_username'])
+            is_account_private_bool = is_account_private(user_at['t_username'])
             
-            # if is_account_private_bool:
-            #     user_from = users_collection.find_one({"t_username": username})
-            #     #Verifica se l'utente 'from' segue l'utente 'to'
-            #     follow_record_1 = follow_user_collection.find_one({
-            #         "t_alias_generated_from": user_from.get("t_alias_generated"),
-            #         "t_alias_generated_to": t_alias_generated
-            #     })
-            #     follow_record_2 = follow_user_collection.find_one({
-            #         "t_alias_generated_from": t_alias_generated,
-            #         "t_alias_generated_to": user_from.get("t_alias_generated"),
-            #     })
-            #     if not follow_record_1 or not follow_record_2:
-            #         return func.HttpResponse("Non puoi inviare il messaggio, l'account dell'utente è privato, dovete seguirvi a vicenda.", status_code=400)
+            if is_account_private_bool:
+                user_from = users_collection.find_one({"t_username": username})
+                #Verifica se l'utente 'from' segue l'utente 'to'
+                follow_record_1 = follow_user_collection.find_one({
+                    "t_alias_generated_from": user_from.get("t_alias_generated"),
+                    "t_alias_generated_to": alias_generated
+                })
+                follow_record_2 = follow_user_collection.find_one({
+                    "t_alias_generated_from": alias_generated,
+                    "t_alias_generated_to": user_from.get("t_alias_generated"),
+                })
+                if not follow_record_1 or not follow_record_2:
+                    return func.HttpResponse("Non puoi inviare il messaggio, l'account dell'utente è privato, dovete seguirvi a vicenda.", status_code=400)
 
-            # is_account_not_message_bool = is_account_not_message(user_at['t_username'])
-            # if is_account_not_message_bool:
-            #     return func.HttpResponse("Non puoi inviare il messaggio, l'utente non desidera ricevere messaggi.", status_code=400)
+            is_account_not_message_bool = is_account_not_message(user_at['t_username'])
+            if is_account_not_message_bool:
+                return func.HttpResponse("Non puoi inviare il messaggio, l'utente non desidera ricevere messaggi.", status_code=400)
 
             new_message = {
                 "user_from": username,
-                "user_at": "",  #user_at['t_username'],
+                "user_at": user_at['t_username'],
                 "message": message,
                 "dateTime": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             }
 
             # Inserisce il nuovo messaggio nel database
-            #messages_collection.insert_one(new_message)
+            messages_collection.insert_one(new_message)
 
             response_body = json.dumps({"message": "Messaggio inviato con successo."})
             return func.HttpResponse(

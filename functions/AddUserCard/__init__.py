@@ -49,11 +49,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not t_username:
                 return func.HttpResponse("Token non valido.", status_code=401)
 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
 
-            t_alias_generated = "JD"  # user.get('t_alias_generated')
+            t_alias_generated = user.get('t_alias_generated')
 
             req_body = req.get_json()
             cardName = req_body.get('cardName')
@@ -72,7 +72,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "cvv": cvv
             }
 
-            # user_cards_collection.insert_one(user_card)
+            user_cards_collection.insert_one(user_card)
 
             return func.HttpResponse(json.dumps({"message":"Carta aggiunta con successo."}), status_code=200)
 

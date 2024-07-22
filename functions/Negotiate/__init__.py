@@ -31,12 +31,12 @@ def main(req: func.HttpRequest, connection) -> func.HttpResponse:
             status_code=400
         )
 
-    # Verifica se l'username esiste nel database
-    # if not username_exists(username):
-    #     return func.HttpResponse(
-    #         "Username does not exist.",
-    #         status_code=404
-    #     )
+    #Verifica se l'username esiste nel database
+    if not username_exists(username):
+        return func.HttpResponse(
+            "Username does not exist.",
+            status_code=404
+        )
 
     # Restituisci la connessione WebSocket
     return func.HttpResponse(connection)

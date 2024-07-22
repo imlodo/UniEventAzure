@@ -80,41 +80,28 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
     
             # Recupera l'utente dal t_alias_generated
-            #user = users_collection.find_one({"t_alias_generated": t_alias_generated})
+            user = users_collection.find_one({"t_alias_generated": t_alias_generated})
     
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
     
-            t_username = "baldi"  #user.get('username')
+            t_username = user.get('username')
 
             # Verifica se l'utente 'from' segue l'utente 'to'
-            #liked_record = content_like_collection.find_one({"content_id": content_id, "t_username": t_username})
+            liked_record = content_like_collection.find_one({"content_id": content_id, "t_username": t_username})
 
-            # if liked_record:
-            #     return func.HttpResponse(
-            #         body=json.dumps({"liked": True, "message": "L'utente ha lasciato un like per il contenuto"}),
-            #         status_code=200,
-            #         mimetype='application/json'
-            #     )
-            # else :
-            #     return func.HttpResponse(
-            #         body=json.dumps({"liked": False, "message": "L'utente non ha lasciato like per il contenuto"}),
-            #         status_code=200,
-            #         mimetype='application/json'
-            #     )
-                
-            if random() > 0.5:
+            if liked_record:
                 return func.HttpResponse(
                     body=json.dumps({"liked": True, "message": "L'utente ha lasciato un like per il contenuto"}),
                     status_code=200,
                     mimetype='application/json'
                 )
-            else:
+            else :
                 return func.HttpResponse(
-                    body=json.dumps({"liked": False, "message": "L'utente non ha lasciato un like per il contenuto"}),
+                    body=json.dumps({"liked": False, "message": "L'utente non ha lasciato like per il contenuto"}),
                     status_code=200,
                     mimetype='application/json'
                 )

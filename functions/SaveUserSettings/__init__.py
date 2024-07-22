@@ -140,7 +140,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Esegui l'aggiornamento delle impostazioni utente nel database
             try:
-                if random() > 0.5:  #update_user_settings(t_username, setting_type, value):
+                if update_user_settings(t_username, setting_type, value):
                     response_body = json.dumps({"message": "Impostazioni aggiornate con successo."})
                     return func.HttpResponse(
                         body=response_body,

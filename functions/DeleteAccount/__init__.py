@@ -76,7 +76,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             }
 
             # Esegui l'aggiornamento nel database
-            if random() > 0.5: #update_user_info(t_username, updates):
+            if update_user_info(t_username, updates):
                 response_body = json.dumps({"message": "Account utente cancellato con successo."})
                 return func.HttpResponse(
                     body=response_body,

@@ -53,17 +53,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
             # Recupera lo stato della richiesta dal database
-            #request_data = requests_collection.find_one({"t_username": username}, {"_id": 0, "status": 1})
+            request_data = requests_collection.find_one({"t_username": username}, {"_id": 0, "status": 1})
             
-            #if not request_data:
-                #return func.HttpResponse("Nessuna richiesta trovata per l'utente.", status_code=404)
-
-            #response_body = json.dumps({"status": request_data.get("status")})
-
-            if random() > 0.7:
+            if not request_data:
                 return func.HttpResponse("Nessuna richiesta trovata per l'utente.", status_code=404)
-            
-            response_body = json.dumps({"status": "REQUESTED" if random() > 0.5 else "DOWNLODABLE" })
+
+            response_body = json.dumps({"status": request_data.get("status")})
+
             return func.HttpResponse(body=response_body, status_code=200, mimetype='application/json')
 
         except Exception as e:

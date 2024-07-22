@@ -94,14 +94,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Verifica se l'utente esiste già
-            #user = user_verify_collection.find_one({"t_username": t_username})
-            user = {}
+            user = user_verify_collection.find_one({"t_username": t_username})
             today_date = datetime.now().date()
 
             if user:
-                existing_status = "refused" if random() > 0.5 else "not_verified"  #user.get('status')
-                refused_date = datetime.now().date() if random() > 0.5 else datetime(2020, 2,
-                                                                                     10).date()  #user.get('refused_date')
+                existing_status = user.get('status')
+                refused_date = user.get('refused_date')
 
                 if existing_status == 'refused' and refused_date and today_date >= (refused_date + timedelta(days=90)):
                     # Aggiorna il record
@@ -119,7 +117,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         "refused_date": None,
                         "refused_motivation": None
                     }
-                    # user_verify_collection.update_one({"t_username": t_username}, {"$set": update_fields})
+                    user_verify_collection.update_one({"t_username": t_username}, {"$set": update_fields})
                 elif existing_status == 'requested' and (status == "refused" or status == "verified"):
                     update_fields = {
                         "name": name,
@@ -135,7 +133,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         "refused_date": datetime.now().date() if status == "refused" else None,
                         "refused_motivation": refused_motivation
                     }
-                    # user_verify_collection.update_one({"t_username": t_username}, {"$set": update_fields})
+                    user_verify_collection.update_one({"t_username": t_username}, {"$set": update_fields})
                 else:
                     # Rifiuta la chiamata
                     return func.HttpResponse("Utente esistente con stato non aggiornabile", status_code=400)
@@ -155,7 +153,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "status": "requested",
                     "refused_date": None
                 }
-                #user_verify_collection.insert_one(new_user)
+                user_verify_collection.insert_one(new_user)
 
             return func.HttpResponse(json.dumps({"message":"Operazione completata con successo"}), status_code=200)
 

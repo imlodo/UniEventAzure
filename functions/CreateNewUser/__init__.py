@@ -107,7 +107,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "is_verified": is_verified,
                 "t_role": str(USER_ROLE.UTENTE)
             }
-            success, result = True, user_data  #add_user(user_data)
+            success, result = add_user(user_data)
             if success:
                 return func.HttpResponse(
                     json.dumps({"message":"Account creato con successo"}),

@@ -75,12 +75,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Recupera l'utente dal database usando t_username
-        # user = users_collection.find_one({"t_username": t_username})
-        # if not user:
-        #     return func.HttpResponse(
-        #         "Utente non trovato.",
-        #         status_code=404
-        #     )
+        user = users_collection.find_one({"t_username": t_username})
+        if not user:
+            return func.HttpResponse(
+                "Utente non trovato.",
+                status_code=404
+            )
 
         req_body = req.get_json()
         t_alias_generated = req_body.get('t_alias_generated')
@@ -93,24 +93,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Recupera l'utente dal t_alias_generated
-        #user = users_collection.find_one({"t_alias_generated": t_alias_generated})
+        user = users_collection.find_one({"t_alias_generated": t_alias_generated})
 
-        # if not user:
-        #     return func.HttpResponse(
-        #         "Utente non trovato.",
-        #         status_code=404
-        #     )
+        if not user:
+            return func.HttpResponse(
+                "Utente non trovato.",
+                status_code=404
+            )
 
-        t_username = "baldi"  #user.get('username')
+        t_username = user.get('username')
 
-        # existing_record = content_booked_collection.find_one({"content_id": content_id, "t_username": t_username})
-        # if existing_record:
-        #     content_booked_collection.delete_one({"content_id": content_id, "t_username": t_username})
-        #     return func.HttpResponse(
-        #         body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
-        #         status_code=201,
-        #         mimetype='application/json'
-        #     )
+        existing_record = content_booked_collection.find_one({"content_id": content_id, "t_username": t_username})
+        if existing_record:
+            content_booked_collection.delete_one({"content_id": content_id, "t_username": t_username})
+            return func.HttpResponse(
+                body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
+                status_code=201,
+                mimetype='application/json'
+            )
 
         # Crea un nuovo record nella tabella CONTENT_BOOKED
         new_record = {
@@ -119,20 +119,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "created_at": datetime.utcnow()
         }
 
-        #content_booked_collection.insert_one(new_record)
-        # return func.HttpResponse(
-        #     body=json.dumps({"booked": True, "message": "Contenuto aggiunto ai preferiti"}),
-        #     status_code=201,
-        #     mimetype='application/json'
-        # )
-        if random() > 0.5:
-            return func.HttpResponse(
-                body=json.dumps({"booked": True, "message": "Contenuto aggiunto ai preferiti"}),
-                status_code=201,
-                mimetype='application/json'
-            )
+        content_booked_collection.insert_one(new_record)
         return func.HttpResponse(
-            body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
+            body=json.dumps({"booked": True, "message": "Contenuto aggiunto ai preferiti"}),
             status_code=201,
             mimetype='application/json'
         )

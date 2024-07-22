@@ -84,20 +84,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # Verifica le credenziali dell'utente nel database
-            # user = verify_user(t_username, t_password)
-            # if user.get("active") == False:
-            #     return func.HttpResponse(
-            #         "Il tuo account è stato eliminato, contatta il supporto.",
-            #         status_code=404
-            #     )
-            # Mock user per scopi di esempio
-            user = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
-                        t_surname="Doe",
-                        t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
-                        t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg", is_verified=True,
-                        t_type="COMPANY",
-                        t_role="Moderatore")
+            #Verifica le credenziali dell'utente nel database
+            user = verify_user(t_username, t_password)
+            if not user.get("active"):
+                return func.HttpResponse(
+                    "Il tuo account è stato eliminato, contatta il supporto.",
+                    status_code=404
+                )
 
             if user:
                 # Genera il token JWT

@@ -62,13 +62,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=401
                 )
 
-            # Recupera l'utente dal database usando t_username
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
+            #Recupera l'utente dal database usando t_username
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
 
             req_body = req.get_json()
 
@@ -84,40 +84,38 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # # Verifica l'evento
-            # event = content_collection.find_one({"_id": ObjectId(event_id)})
-            # if not event:
-            #     return func.HttpResponse(
-            #         "Evento non trovato.",
-            #         status_code=404
-            #     )
+            # Verifica l'evento
+            event = content_collection.find_one({"_id": ObjectId(event_id)})
+            if not event:
+                return func.HttpResponse(
+                    "Evento non trovato.",
+                    status_code=404
+                )
 
-            # Verifica la carta
-            # card = user_cards_collection.find_one(
-            #     {"_id": ObjectId(card_id), "t_alias_generated": user['t_alias_generated']})
-            # if not card:
-            #     return func.HttpResponse(
-            #         "Carta non trovata.",
-            #         status_code=404
-            #     )
+            #Verifica la carta
+            card = user_cards_collection.find_one(
+                {"_id": ObjectId(card_id), "t_alias_generated": user['t_alias_generated']})
+            if not card:
+                return func.HttpResponse(
+                    "Carta non trovata.",
+                    status_code=404
+                )
 
-            # Verifica l'indirizzo
-            # address = user_addresses_collection.find_one(
-            #     {"_id": ObjectId(address_id), "t_alias_generated": user['t_alias_generated']})
-            # if not address:
-            #     return func.HttpResponse(
-            #         "Indirizzo non trovato.",
-            #         status_code=404
-            #     )
+            #Verifica l'indirizzo
+            address = user_addresses_collection.find_one(
+                {"_id": ObjectId(address_id), "t_alias_generated": user['t_alias_generated']})
+            if not address:
+                return func.HttpResponse(
+                    "Indirizzo non trovato.",
+                    status_code=404
+                )
 
             # Verifica il coupon (se presente)
             discount = 0
-            #mock
-            discount = 20
-            # if coupon_id:
-            #     coupon = event_coupons_collection.find_one({"_id": ObjectId(coupon_id)})
-            #     if coupon:
-            #         discount = coupon.get('discount', 0)
+            if coupon_id:
+                coupon = event_coupons_collection.find_one({"_id": ObjectId(coupon_id)})
+                if coupon:
+                    discount = coupon.get('discount', 0)
 
             # Verifica e calcola il prezzo totale dei biglietti
             total_price = 0
@@ -146,31 +144,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "coupon_id": coupon_id
             }
 
-            # result = tickets_collection.insert_one(ticket_record)
-            # ticket_record['ticket_id'] = str(result.inserted_id)
-            
-            #MOCK
-            ticket_record = {
-                "ticket_id": "60c72b2f9b1d4c3d88f78907",
-                "status": "Confermato",
-                "creation_date": datetime.utcnow().isoformat(),
-                "ticket_type": eventTicketList[0].get('t_type'),
-                "price": total_price,
-                "event_id": event_id,
-                "address_id": address_id,
-                "card_id": card_id,
-                "coupon_id": coupon_id
-            } if payment_status else {
-                "ticket_id": "60c72b2f9b1d4c3d88f78907",
-                "status": "Rifiutato",
-                "creation_date": datetime.utcnow().isoformat(),
-                "ticket_type": eventTicketList[0].get('t_type'),
-                "price": total_price,
-                "event_id": event_id,
-                "address_id": address_id,
-                "card_id": card_id,
-                "coupon_id": coupon_id
-            }
+            result = tickets_collection.insert_one(ticket_record)
+            ticket_record['ticket_id'] = str(result.inserted_id)
 
             return func.HttpResponse(
                 body=json.dumps(ticket_record),

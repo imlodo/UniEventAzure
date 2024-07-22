@@ -47,33 +47,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not t_username:
                 return func.HttpResponse("Token non valido.", status_code=401)
 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
-            # 
-            # t_alias_generated = user.get('t_alias_generated')
-            # 
-            # user_addresses = list(user_addresses_collection.find({"t_alias_generated": t_alias_generated}))
-            user_addresses = [
-                {
-                    "address_id": "asjhaskkasjd38y273",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "street": "123 Main St",
-                    "city": "Springfield",
-                    "state": "IL",
-                    "zip": 62701
-                },
-                {
-                    "address_id": "asdjasjdjasjdah312",
-                    "firstName": "Jane",
-                    "lastName": "Doe",
-                    "street": "456 Elm St",
-                    "city": "Springfield",
-                    "state": "IL",
-                    "zip": 62702
-                }
-            ]
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
+
+            t_alias_generated = user.get('t_alias_generated')
+
+            user_addresses = list(user_addresses_collection.find({"t_alias_generated": t_alias_generated}))
             
             return func.HttpResponse(
                 body=json.dumps(user_addresses),

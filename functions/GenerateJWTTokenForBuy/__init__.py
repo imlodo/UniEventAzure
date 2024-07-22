@@ -27,6 +27,7 @@ users_collection = db.Users
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+
 # Funzione per generare un token JWT
 def generate_jwt_token(user, t_event_ticket_list):
     # Configura la chiave segreta (da mantenere in un ambiente sicuro)
@@ -81,24 +82,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "User non trovato.",
-            #         status_code=404
-            #     )
-            # if user.get("active") == False:
-            #     return func.HttpResponse(
-            #         "Il tuo account è stato eliminato, contatta il supporto.",
-            #         status_code=404
-            #     )
-
-            # Mock user per scopi di esempio
-            user = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
-                        t_surname="Doe",
-                        t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
-                        t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg", is_verified=True,
-                        t_type="CREATOR")
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "User non trovato.",
+                    status_code=404
+                )
+            if not user.get("active"):
+                return func.HttpResponse(
+                    "Il tuo account è stato eliminato, contatta il supporto.",
+                    status_code=404
+                )
 
             if user:
                 # Genera il token JWT

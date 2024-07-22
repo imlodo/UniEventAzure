@@ -59,29 +59,27 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Dati incompleti nel corpo della richiesta.", status_code=400)
 
             # Trova l'utente
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
-            # 
-            # t_alias_generated = user.get('t_alias_generated')
-            # 
-            # # Trova il contenuto
-            # content = content_collection.find_one({"_id": content_id, "t_alias_generated": t_alias_generated})
-            # if not content:
-            #     return func.HttpResponse("Contenuto non trovato o l'utente non è autorizzato.", status_code=404)
-            # 
-            # # Aggiungi il coupon
-            # new_coupon = {
-            #     "coupon_id": str(pymongo.collection.ObjectId()),
-            #     "event_id": content_id,
-            #     "coupon_code": coupon_code,
-            #     "discount": discount
-            # }
-            # 
-            #coupon = coupons_collection.insert_one(new_coupon)
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
 
-            coupon = {"coupon_id": "AASDASD3121", "event_id": content_id, "coupon_code": coupon_code,
-                      "discount": discount}
+            t_alias_generated = user.get('t_alias_generated')
+
+            # Trova il contenuto
+            content = content_collection.find_one({"_id": content_id, "t_alias_generated": t_alias_generated})
+            if not content:
+                return func.HttpResponse("Contenuto non trovato o l'utente non è autorizzato.", status_code=404)
+
+            # Aggiungi il coupon
+            new_coupon = {
+                "coupon_id": str(pymongo.collection.ObjectId()),
+                "event_id": content_id,
+                "coupon_code": coupon_code,
+                "discount": discount
+            }
+
+            coupon = coupons_collection.insert_one(new_coupon)
+
             return func.HttpResponse(
                 json.dumps({"coupon": coupon}, default=str),
                 status_code=200,

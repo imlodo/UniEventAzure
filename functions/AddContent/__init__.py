@@ -109,6 +109,7 @@ def store_content_mentions(mentionsArray, content_id):
         }
         content_mentions_collections.insert_one(mentionObj)
 
+
 def get_next_available_group_id():
     # Trova tutti i documenti con un valore n_group_id
     pipeline = [
@@ -120,6 +121,7 @@ def get_next_available_group_id():
         return result[0]["max_group_id"] + 1
     else:
         return 1
+
 
 def get_or_assign_group_event_id(related_event_id):
     content = content_collection.find_one({"_id": ObjectId(related_event_id)})
@@ -134,6 +136,7 @@ def get_or_assign_group_event_id(related_event_id):
             )
             return next_group_id
     return None
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -193,7 +196,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "Parametri mancanti nel corpo della richiesta.",
                     status_code=400
                 )
-            
+
             if not group_event_id and related_event_id:
                 group_event_id = get_or_assign_group_event_id(related_event_id)
 
@@ -220,19 +223,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "group_event_id": group_event_id
                 })
 
-            # result = content_collection.insert_one(content_data)
-            # content_data['id'] = str(result.inserted_id)
+            result = content_collection.insert_one(content_data)
+            content_data['id'] = str(result.inserted_id)
 
-            # if t_type.lower() == "eventi":
-            #     locationResult = store_event_location(t_location, content_data['id'])
-            #     content_data['location'] = locationResult
-            #     store_event_maps(t_maps, content_data['id'])
+            if t_type.lower() == "eventi":
+                locationResult = store_event_location(t_location, content_data['id'])
+                content_data['location'] = locationResult
+                store_event_maps(t_maps, content_data['id'])
 
-            # if hashTagArray:
-            #     store_content_tags(hashTagArray, content_data['id'])
+            if hashTagArray:
+                store_content_tags(hashTagArray, content_data['id'])
 
-            # if tagArray: 
-            #     store_content_mentions(tagArray, content_data['id'])
+            if tagArray:
+                store_content_mentions(tagArray, content_data['id'])
 
             return func.HttpResponse(
                 body=json.dumps(content_data),

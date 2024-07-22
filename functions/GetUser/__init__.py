@@ -91,33 +91,9 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Ottieni le informazioni complete dell'utente dal database
             if alias_generated:
-                # user_info = get_user_info_by_alias(alias_generated)
-                if alias_generated == "JD":
-                    user_info = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
-                                     t_surname="Doe",
-                                     t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
-                                     t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
-                                     is_verified=False,
-                                     t_type="COMPANY",
-                                     t_role="Moderatore")
-                else:
-                    user_info = dict(_id="012933924", t_username="mariobaldi", t_password="hashed_password",
-                                     t_name="Mario",
-                                     t_surname="Baldi",
-                                     t_alias_generated="Mario Baldi", t_description="Lorem ipsum dolor sit amet.",
-                                     t_profile_photo="http://localhost:4200/assets/img/dolcevita.png",
-                                     is_verified=True,
-                                     t_type="COMPANY",
-                                     t_role="Moderatore") #"Super Moderatore" "Utente"
+                user_info = get_user_info_by_alias(alias_generated)
             else:
-                # user_info = get_user_info_by_username(t_username)
-                user_info = dict(_id="012933923", t_username="johndoe", t_password="hashed_password", t_name="John",
-                                 t_surname="Doe",
-                                 t_alias_generated="JD", t_description="Lorem ipsum dolor sit amet.",
-                                 t_profile_photo="http://localhost:4200/assets/img/userExampleImg.jpeg",
-                                 is_verified=False,
-                                 t_type="COMPANY",
-                                 t_role="Moderatore")
+                user_info = get_user_info_by_username(t_username)
 
             if user_info:
                 # Costruisci il corpo della risposta come oggetto JSON senza 't_password' e '_id'

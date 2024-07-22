@@ -49,11 +49,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not t_username:
                 return func.HttpResponse("Token non valido.", status_code=401)
 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
 
-            t_alias_generated = "JD"  # user.get('t_alias_generated')
+            t_alias_generated = user.get('t_alias_generated')
 
             req_body = req.get_json()
             firstName = req_body.get('firstName')
@@ -61,9 +61,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             street = req_body.get('street')
             city = req_body.get('city')
             state = req_body.get('state')
-            zip = req_body.get('zip')
+            zipCode = req_body.get('zip')
 
-            if not firstName or not lastName or not street or not city or not state or not zip:
+            if not firstName or not lastName or not street or not city or not state or not zipCode:
                 return func.HttpResponse("Indirizzo non valido.", status_code=400)
 
             user_address = {
@@ -73,10 +73,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "street": street,
                 "city": city,
                 "state": state,
-                "zip": zip
+                "zip": zipCode
             }
 
-            # user_addresses_collection.insert_one(user_address)
+            user_addresses_collection.insert_one(user_address)
 
             return func.HttpResponse(json.dumps({"message": "Indirizzo aggiunto con successo."}), status_code=200)
 

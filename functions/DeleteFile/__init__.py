@@ -8,6 +8,7 @@ import azure.functions as func
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -63,7 +64,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Extract the blob name from the URL
             blob_name = blob_url.split('/')[-1]
-
+            print(blob_name)
             # Get a blob client
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
@@ -77,7 +78,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
-            return func.HttpResponse("Error deleting file.", status_code=500)
+            return func.HttpResponse(f"Error deleting file: {str(e)}", status_code=500)
     else:
         return func.HttpResponse(
             "Metodo non supportato. Utilizzare il metodo DELETE.",

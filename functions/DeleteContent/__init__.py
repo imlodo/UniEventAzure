@@ -77,31 +77,31 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             content_id = req_body.get('content_id')
 
             # Ottieni il contenuto e l'utente creatore
-            # content = content_collection.find_one({"_id": content_id})
-            # if not content:
-            #     return func.HttpResponse(
-            #         "Contenuto non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # # Controlla se l'utente è il creatore del contenuto
-            # if content.get('t_alias_generated') != user.get('t_alias_generated'):
-            #     return func.HttpResponse(
-            #         "L'utente non è autorizzato a cancellare questo contenuto.",
-            #         status_code=403
-            #     )
-            # 
-            # # Cancella il contenuto
-            # result = content_collection.delete_one({"_id": content_id})
+            content = content_collection.find_one({"_id": content_id})
+            if not content:
+                return func.HttpResponse(
+                    "Contenuto non trovato.",
+                    status_code=404
+                )
 
-            if random.random() > 0.5:  #result.deleted_count == 1:
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
+
+            # # Controlla se l'utente è il creatore del contenuto
+            if content.get('t_alias_generated') != user.get('t_alias_generated'):
+                return func.HttpResponse(
+                    "L'utente non è autorizzato a cancellare questo contenuto.",
+                    status_code=403
+                )
+
+            # Cancella il contenuto
+            result = content_collection.delete_one({"_id": content_id})
+
+            if result.deleted_count == 1:
                 return func.HttpResponse(
                     json.dumps({"message": "Contenuto cancellato con successo."}),
                     status_code=200,

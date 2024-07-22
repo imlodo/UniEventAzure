@@ -84,11 +84,11 @@ def main(request, actions: func.Out[str]) -> None:
         logging.error("Invalid token payload.")
         return
 
-    # Ottieni l'utente completo (user_from) dal token
-    # user_from = get_user_info_by_username(t_username)
-    # if not user_from:
-    #     logging.error("User not found.")
-    #     return
+    #Ottieni l'utente completo (user_from) dal token
+    user_from = get_user_info_by_username(t_username)
+    if not user_from:
+        logging.error("User not found.")
+        return
 
     # Ottieni i dettagli del messaggio
     t_alias_generated = request_json.get('t_alias_generated')
@@ -98,31 +98,19 @@ def main(request, actions: func.Out[str]) -> None:
         logging.error("Missing required fields.")
         return
 
-    # Ottieni l'utente completo (user_to) dall'alias generato
-    # user_to = get_user_info_by_alias(t_alias_generated)
-    # if not user_to:
-    #     logging.error("Recipient user not found.")
-    #     return
+    #Ottieni l'utente completo (user_to) dall'alias generato
+    user_to = get_user_info_by_alias(t_alias_generated)
+    if not user_to:
+        logging.error("Recipient user not found.")
+        return
 
     # Aggiungi la data di creazione corrente
     creation_date = datetime.utcnow().isoformat()
 
     # Costruisci l'oggetto da inviare
     message_object = {
-        "user_from": {
-            "t_name": "Luca",
-            "t_surname": "Bianchi",
-            "t_alias_generated": "JD",
-            "t_profile_photo": "https://cdn.21buttons.com/posts/640x799/a4f98433206c47f3ac3b47039996f26f_1080x1349.jpg",
-            "t_type": "CREATOR"
-        },#user_from,
-        "user_at": {
-            "t_name": "Marco",
-            "t_surname": "Rossi",
-            "t_alias_generated": t_alias_generated,
-            "t_profile_photo": "https://staff.polito.it/mario.baldi/images/Mario%20202004.jpg",
-            "t_type": "ARTIST"
-        },#user_to,
+        "user_from": user_from,
+        "user_at": user_to,
         "message": message_content,
         "dateTime": creation_date
     }

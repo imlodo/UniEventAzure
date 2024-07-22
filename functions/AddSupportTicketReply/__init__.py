@@ -55,20 +55,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not username:
                 return func.HttpResponse("Token non contiene informazioni valide.", status_code=401)
 
-            # Recupera l'alias e il ruolo dal database usando l'username
-            # user_data = users_collection.find_one({"username": username})
-            # if not user_data:
-            #     return func.HttpResponse("Utente non trovato.", status_code=404)
-            # 
-            # alias = user_data.get("alias")
-            # role = user_data.get("role")
-            # 
-            # if not alias or not role:
-            #     return func.HttpResponse("Dati dell'utente mancanti.", status_code=400)
-            # 
-            # # Controlla se il ruolo è valido
-            # if role not in ALLOWED_ROLES:
-            #     return func.HttpResponse("Ruolo dell'utente non valido.", status_code=400)
+            #Recupera l'alias e il ruolo dal database usando l'username
+            user_data = users_collection.find_one({"username": username})
+            if not user_data:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
+
+            alias = user_data.get("alias")
+            role = user_data.get("role")
+
+            if not alias or not role:
+                return func.HttpResponse("Dati dell'utente mancanti.", status_code=400)
+
+            # Controlla se il ruolo è valido
+            if role not in ALLOWED_ROLES:
+                return func.HttpResponse("Ruolo dell'utente non valido.", status_code=400)
 
             # Ottieni i dati dalla richiesta
             try:
@@ -87,21 +87,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # Crea un nuovo record per la risposta
             response = {
                 "support_ticket_id": ticket_id,
-                "alias": "",  #alias,
-                "role": "",  #role,
+                "alias": alias,
+                "role": role,
                 "replyDateHour": datetime.utcnow().strftime("%d/%m/%Y %H:%M"),
                 "body": body,
                 "attachments": attachments
             }
 
             # Inserisce la risposta nel database
-            #support_ticket_discussion_collection.insert_one(response)
+            support_ticket_discussion_collection.insert_one(response)
 
             # Aggiorna lo stato del ticket
-            # support_ticket_collection.update_one(
-            #     {"_id": ticket_id},
-            #     {"$set": {"status": new_status}}
-            # )
+            support_ticket_collection.update_one(
+                {"_id": ticket_id},
+                {"$set": {"status": new_status}}
+            )
 
             response_body = json.dumps({"message": "Risposta aggiunta con successo"})
             return func.HttpResponse(

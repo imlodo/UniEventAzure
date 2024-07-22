@@ -77,33 +77,33 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             coupon_id = req_body.get('coupon_id')
 
-            # Ottieni il contenuto e l'utente creatore
-            # coupon = coupons_collection.find_one({"_id": coupon_id})
-            # if not coupon:
-            #     return func.HttpResponse(
-            #         "Coupon non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # user = users_collection.find_one({"t_username": t_username})
-            # if not user:
-            #     return func.HttpResponse(
-            #         "Utente non trovato.",
-            #         status_code=404
-            #     )
-            # 
-            # # Controlla se l'utente è il creatore del contenuto
-            #content = content_collection.find_one({"_id": coupon.get("event_id")})
-            # if content.get('t_alias_generated') != user.get('t_alias_generated'):
-            #     return func.HttpResponse(
-            #         "L'utente non è autorizzato a cancellare questo coupon.",
-            #         status_code=403
-            #     )
-            # 
-            # # Cancella il contenuto
-            # result = coupons_collection.delete_one({"_id": coupon_id})
+            #Ottieni il contenuto e l'utente creatore
+            coupon = coupons_collection.find_one({"_id": coupon_id})
+            if not coupon:
+                return func.HttpResponse(
+                    "Coupon non trovato.",
+                    status_code=404
+                )
 
-            if random.random() > 0.5:  #result.deleted_count == 1:
+            user = users_collection.find_one({"t_username": t_username})
+            if not user:
+                return func.HttpResponse(
+                    "Utente non trovato.",
+                    status_code=404
+                )
+
+            # Controlla se l'utente è il creatore del contenuto
+            content = content_collection.find_one({"_id": coupon.get("event_id")})
+            if content.get('t_alias_generated') != user.get('t_alias_generated'):
+                return func.HttpResponse(
+                    "L'utente non è autorizzato a cancellare questo coupon.",
+                    status_code=403
+                )
+
+            # Cancella il contenuto
+            result = coupons_collection.delete_one({"_id": coupon_id})
+
+            if result.deleted_count == 1:
                 return func.HttpResponse(
                     json.dumps({"message": "Coupon cancellato con successo."}),
                     status_code=200,

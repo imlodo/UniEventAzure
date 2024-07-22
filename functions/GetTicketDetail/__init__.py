@@ -24,6 +24,7 @@ tickets_collection = db.Tickets
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -56,41 +57,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Numero del biglietto non fornito.", status_code=400)
 
             # Recupera il biglietto dal database
-            #ticket = tickets_collection.find_one({"username": username, "ticket_id": ticket_id})
-            #if not ticket:
-                #return func.HttpResponse("Biglietto non trovato.", status_code=404)
-            
+            ticket = tickets_collection.find_one({"username": username, "ticket_id": ticket_id})
+            if not ticket:
+                return func.HttpResponse("Biglietto non trovato.", status_code=404)
+
             ticket_detail = {
-                "ticket_id": "ABC123",
-                "status": "Confermato",
-                "creation_date": "20/06/2023",
-                "ticket_type": {
-                    "TABLE": {
-                        "DISCOTECA": True,
-                        "DISCOTECA_DJ": False
-                    }
-                },
-                "price": "50.00",
+                "ticket_id": ticket.get("ticket_id"),
+                "status": "Confermato" if ticket.get("status") == "confirmed" else "Annullato",
+                "creation_date": datetime.strptime(ticket.get("creation_date"), "%Y-%m-%d").strftime("%d/%m/%Y"),
+                "ticket_type": ticket.get("ticket_type", {}),
+                "price": "{:.2f}".format(ticket.get("price", 0)),
                 "event": {
-                    "event_id": "ABCD213SA",
-                    "t_title": "Summer Music Festival",
-                    "t_event_date": "15/07/2023",
-                    "t_image_link": "/assets/img/event-image-placeholder.jpg"
+                    "event_id": ticket.get("event_id"),
+                    "t_title": ticket.get("event_name"),
+                    "t_event_date": ticket.get("event_date"),
+                    "t_image_link": ticket.get("event_image_link")
                 }
             }
-            # ticket_detail = {
-            #     "ticket_id": ticket.get("ticket_id"),
-            #     "status": "Confermato" if ticket.get("status") == "confirmed" else "Annullato",
-            #     "creation_date": datetime.strptime(ticket.get("creation_date"), "%Y-%m-%d").strftime("%d/%m/%Y"),
-            #     "ticket_type": ticket.get("ticket_type", {}),
-            #     "price": "{:.2f}".format(ticket.get("price", 0)),
-            #     "event": {
-            #         "event_id": ticket.get("event_id"),
-            #         "t_title": ticket.get("event_name"),
-            #         "t_event_date": ticket.get("event_date"),
-            #         "t_image_link": ticket.get("event_image_link")
-            #     }
-            # }
 
             return func.HttpResponse(
                 body=json.dumps(ticket_detail),

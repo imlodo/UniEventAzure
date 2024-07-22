@@ -59,18 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         "Il parametro body è obbligatorio.",
                         status_code=400
                     )
-                # t_user = users_collection.find_one({"t_username": t_username})
-                t_user = {
-                    "id": 1,
-                    "t_name": "Mario Rossi",
-                    "t_follower_number": 1000,
-                    "t_alias_generated": "mariorossi",
-                    "t_description": "Appassionato di tecnologia e innovazione.",
-                    "t_profile_photo": "/assets/img/example_artist_image.jpg",
-                    "t_type": 1,
-                    "is_verified": True,
-                    "type": "Utenti"
-                }
+                t_user = users_collection.find_one({"t_username": t_username})
                 if not t_user:
                     return func.HttpResponse(
                         "Utente non valido",
@@ -78,30 +67,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     )
                 created_date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-                # new_discussion = {
-                #     "content_id": content_id,
-                #     "parent_discussion_id": parent_discussion_id,
-                #     "body": body,
-                #     "like_count": 0,
-                #     "t_user": t_user,
-                #     "created_date": created_date,
-                #     "is_liked_by_current_user": False,
-                #     "t_alias_generated_reply": t_alias_generated_reply
-                # }
-                # 
-                # result = discussion_collection.insert_one(new_discussion)
-                # inserted_discussion = discussion_collection.find_one({"_id": result.inserted_id})
-
-                inserted_discussion = {
+                new_discussion = {
                     "content_id": content_id,
-                    "discussion_id": "ABCD123",
                     "parent_discussion_id": parent_discussion_id,
                     "body": body,
                     "like_count": 0,
                     "t_user": t_user,
                     "created_date": created_date,
+                    "is_liked_by_current_user": False,
                     "t_alias_generated_reply": t_alias_generated_reply
                 }
+
+                result = discussion_collection.insert_one(new_discussion)
+                inserted_discussion = discussion_collection.find_one({"_id": result.inserted_id})
+
                 return func.HttpResponse(
                     json.dumps({"discussion": inserted_discussion}, default=str),
                     status_code=200,

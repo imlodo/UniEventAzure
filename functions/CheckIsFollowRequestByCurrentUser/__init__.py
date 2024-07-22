@@ -80,13 +80,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            # Verifica se l'utente 'from' segue l'utente 'to'
-            #follow_request_record = follow_user_request_collection.find_one({
-            #    "t_alias_generated_from": t_alias_generated_from,
-            #    "t_alias_generated_to": t_alias_generated_to
-            #})
+            #Verifica se l'utente 'from' segue l'utente 'to'
+            follow_request_record = follow_user_request_collection.find_one({
+               "t_alias_generated_from": t_alias_generated_from,
+               "t_alias_generated_to": t_alias_generated_to
+            })
 
-            if random() > 0.5:
+            if follow_request_record:
                 return func.HttpResponse(
                     body=json.dumps({"followRequest": True, "message": "L'utente ha inviato la richiesta di seguire l'altro utente."}),
                     status_code=200,

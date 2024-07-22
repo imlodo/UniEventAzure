@@ -68,80 +68,18 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 return HttpResponse("ID evento mancante.", status_code=400)
 
             # Decodifica il token e ottieni l'alias dell'utente
-            # try:
-            #     user_alias = get_user_alias_from_token(token)
-            # except ValueError as e:
-            #     return HttpResponse(str(e), status_code=401)
-            # 
-            # # Verifica se l'utente è l'autore dell'evento
-            # event_creator_alias = get_event_creator_alias(event_id)
-            # if event_creator_alias != user_alias:
-            #     return HttpResponse("Utente non autorizzato a visualizzare i coupon per questo evento.", status_code=403)
+            try:
+                user_alias = get_user_alias_from_token(token)
+            except ValueError as e:
+                return HttpResponse(str(e), status_code=401)
+
+            # Verifica se l'utente è l'autore dell'evento
+            event_creator_alias = get_event_creator_alias(event_id)
+            if event_creator_alias != user_alias:
+                return HttpResponse("Utente non autorizzato a visualizzare i coupon per questo evento.", status_code=403)
 
             # Recupera i coupon per l'evento
-            # coupons = get_coupons_for_event(event_id)
-            coupons = [
-                {
-                    "coupon_id": "001",
-                    "event_id": "E123",
-                    "coupon_code": "WELCOME10",
-                    "discount": 10
-                },
-                {
-                    "coupon_id": "002",
-                    "event_id": "E123",
-                    "coupon_code": "SUMMER15",
-                    "discount": 15
-                },
-                {
-                    "coupon_id": "003",
-                    "event_id": "E123",
-                    "coupon_code": "FESTIVAL20",
-                    "discount": 20
-                },
-                {
-                    "coupon_id": "004",
-                    "event_id": "E124",
-                    "coupon_code": "EARLYBIRD25",
-                    "discount": 25
-                },
-                {
-                    "coupon_id": "005",
-                    "event_id": "E124",
-                    "coupon_code": "STUDENT30",
-                    "discount": 30
-                },
-                {
-                    "coupon_id": "006",
-                    "event_id": "E125",
-                    "coupon_code": "FALL10",
-                    "discount": 10
-                },
-                {
-                    "coupon_id": "007",
-                    "event_id": "E125",
-                    "coupon_code": "BLACKFRIDAY50",
-                    "discount": 50
-                },
-                {
-                    "coupon_id": "008",
-                    "event_id": "E126",
-                    "coupon_code": "VIP15",
-                    "discount": 15
-                },
-                {
-                    "coupon_id": "009",
-                    "event_id": "E126",
-                    "coupon_code": "LASTMINUTE20",
-                    "discount": 20
-                },
-                {
-                    "coupon_id": "010",
-                    "event_id": "E127",
-                    "coupon_code": "NEWYEAR25",
-                    "discount": 25
-                }
-            ]
+            coupons = get_coupons_for_event(event_id)
             response_body = json.dumps({"coupons": coupons})
 
             return HttpResponse(
