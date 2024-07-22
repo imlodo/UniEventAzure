@@ -68,7 +68,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not user:
             return func.HttpResponse("User not found.", status_code=404)
 
-        email = user.get('t_email')
+        email = user.get('t_username')
         if not email:
             return func.HttpResponse("User does not have an email address.", status_code=400)
 

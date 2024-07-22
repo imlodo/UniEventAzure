@@ -84,9 +84,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=400
                 )
 
-            #Verifica le credenziali dell'utente nel database
+            # Verifica le credenziali dell'utente nel database
             user = verify_user(t_username, t_password)
-            if not user.get("active"):
+            if not user:
+                return func.HttpResponse(
+                    "Le credenziali non sono valide.",
+                    status_code=404
+                )
+            
+            if not user.get("t_active"):
                 return func.HttpResponse(
                     "Il tuo account è stato eliminato, contatta il supporto.",
                     status_code=404

@@ -5,7 +5,9 @@ import string
 from pymongo import MongoClient
 from datetime import datetime
 from dotenv import load_dotenv
+from dotenv import load_dotenv
 
+load_dotenv()
 # Carica le variabili di ambiente
 load_dotenv()
 

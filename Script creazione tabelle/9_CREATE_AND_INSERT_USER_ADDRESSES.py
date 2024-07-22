@@ -2,7 +2,9 @@ import os
 import pymongo
 from pymongo import MongoClient
 from faker import Faker  # Usato per generare dati fittizi
+from dotenv import load_dotenv
 
+load_dotenv()
 # Connessione al database MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
 client = MongoClient(connectString)

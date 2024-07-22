@@ -71,7 +71,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Crea un dizionario per gli aggiornamenti di cancellazione logica
             updates = {
-                "active": False,
+                "t_active": False,
                 "deleted_date": datetime.utcnow()
             }
 

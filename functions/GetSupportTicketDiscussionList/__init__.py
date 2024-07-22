@@ -2,6 +2,8 @@ import logging
 import os
 import json
 from datetime import datetime
+
+from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
@@ -59,18 +61,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Ticket ID mancante nella richiesta.", status_code=400)
 
             # Verifica se l'utente è associato al ticket
-            ticket = support_tickets_collection.find_one({"id": ticket_id, "t_username": username})
+            ticket = support_tickets_collection.find_one({"_id": ObjectId(ticket_id), "t_username": username})
             if not ticket:
                 return func.HttpResponse("Utente non autorizzato a visualizzare questo ticket.", status_code=403)
 
             # Recupera tutte le risposte per il ticket
-            discussions = list(support_ticket_discussion_collection.find({"support_ticket_id": ticket_id}))
+            discussions = list(support_ticket_discussion_collection.find({"support_ticket_id": ObjectId(ticket_id)}))
 
             # Trasforma il risultato in una lista di dizionari
             discussion_list = []
             for discussion in discussions:
                 discussion_list.append({
-                    "support_ticket_id": discussion.get("support_ticket_id"),
+                    "support_ticket_id": str(discussion.get("support_ticket_id")),
                     "alias": discussion.get("alias"),
                     "role": discussion.get("role"),
                     "replyDateHour": discussion.get("replyDateHour"),

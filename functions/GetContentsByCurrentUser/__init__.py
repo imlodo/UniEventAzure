@@ -1,11 +1,8 @@
 import logging
 import os
-
-import pymongo
-from azure.functions import HttpResponse
+import json
 from pymongo import MongoClient
 import azure.functions as func
-import json
 import jwt
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
@@ -27,19 +24,23 @@ logging.basicConfig(level=logging.INFO)
 
 
 def get_content_by_current_user(t_alias_generated):
-    content_list = content_collection.find({"t_alias_generated": t_alias_generated})
+    # Trova tutti i documenti nella collezione dei contenuti con l'alias specificato
+    content_list_cursor = content_collection.find({"t_alias_generated": t_alias_generated})
+
+    # Converti il cursore in una lista di dizionari
+    content_list = list(content_list_cursor)
 
     return content_list
 
 
-def main(req: func.HttpRequest) -> HttpResponse:
+def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     if req.method == 'GET':
         try:
             token = req.headers.get('Authorization')
             if not token:
-                return HttpResponse("Token mancante.", status_code=401)
+                return func.HttpResponse("Token mancante.", status_code=401)
 
             auth_header = req.headers.get('Authorization')
             if not auth_header or not auth_header.startswith('Bearer '):
@@ -73,12 +74,26 @@ def main(req: func.HttpRequest) -> HttpResponse:
                     "Token non contiene un username valido.",
                     status_code=401
                 )
+
             userRetrived = users_collection.find_one({"t_username": t_username})
-            content_list = get_content_by_current_user(userRetrived.get("t_alias_generated"))
+            if not userRetrived:
+                return func.HttpResponse("Utente non trovato.", status_code=404)
+
+            alias_generated = userRetrived.get("t_alias_generated")
+            if not alias_generated:
+                return func.HttpResponse("Alias generato non trovato.", status_code=404)
+
+            # Ottieni la lista dei contenuti
+            content_list = get_content_by_current_user(alias_generated)
+
+            # Converti ObjectId in stringa se necessario
+            for content in content_list:
+                if '_id' in content:
+                    content['_id'] = str(content['_id'])
 
             response_body = json.dumps({"content_list": content_list})
 
-            return HttpResponse(
+            return func.HttpResponse(
                 body=response_body,
                 status_code=200,
                 mimetype='application/json'
@@ -86,12 +101,13 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
-            return HttpResponse(
+            return func.HttpResponse(
                 "Si è verificato un errore durante il recupero dei contenuti.",
                 status_code=500
             )
 
     else:
-        return HttpResponse(
-            status_code=404
+        return func.HttpResponse(
+            "Metodo non supportato. Utilizzare il metodo GET.",
+            status_code=405
         )

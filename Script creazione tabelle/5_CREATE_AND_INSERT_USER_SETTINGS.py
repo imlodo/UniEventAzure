@@ -3,7 +3,9 @@ import pymongo
 import random
 import json
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
+load_dotenv()
 # Ottieni la stringa di connessione dal file delle variabili d'ambiente
 connectString = os.getenv("DB_CONNECTION_STRING")
 

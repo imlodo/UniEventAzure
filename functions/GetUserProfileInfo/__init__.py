@@ -25,7 +25,6 @@ follow_user_collection = db.FollowUser
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
-
 # Funzione per ottenere i dettagli dell'utente
 def get_user_info(t_alias_generated):
     user = users_collection.find_one({"t_alias_generated": t_alias_generated})
@@ -37,11 +36,9 @@ def get_user_info(t_alias_generated):
         return user
     return None
 
-
 # Funzione per ottenere i contenuti dell'utente (ultimi 5)
 def get_user_content(t_alias_generated, limit=5):
-    contents = content_collection.find({"t_alias_generated": t_alias_generated}).sort("created_date",
-                                                                                      pymongo.DESCENDING).limit(limit)
+    contents = content_collection.find({"t_alias_generated": t_alias_generated}).sort("created_date", pymongo.DESCENDING).limit(limit)
     content_list = []
     for content in contents:
         if '_id' in content:
@@ -49,11 +46,9 @@ def get_user_content(t_alias_generated, limit=5):
         content_list.append(content)
     return content_list
 
-
 # Funzione per ottenere i contenuti aggiunti ai preferiti dall'utente (ultimi 5)
 def get_user_booked_content(t_username, limit=5):
-    booked_contents = content_booked_collection.find({"t_username": t_username}).sort(
-        "created_date", pymongo.DESCENDING).limit(limit)
+    booked_contents = content_booked_collection.find({"t_username": t_username}).sort("created_date", pymongo.DESCENDING).limit(limit)
     content_list = []
     for booked in booked_contents:
         content = content_collection.find_one({"_id": booked["content_id"]})
@@ -63,12 +58,9 @@ def get_user_booked_content(t_username, limit=5):
             content_list.append(content)
     return content_list
 
-
 # Funzione per ottenere i contenuti piaciuti dall'utente (ultimi 5)
 def get_user_liked_content(t_alias_generated, limit=5):
-    liked_contents = content_liked_collection.find({"t_user.t_alias_generated": t_alias_generated}).sort("created_date",
-                                                                                                         pymongo.DESCENDING).limit(
-        limit)
+    liked_contents = content_liked_collection.find({"t_user.t_alias_generated": t_alias_generated}).sort("created_date", pymongo.DESCENDING).limit(limit)
     content_list = []
     for liked in liked_contents:
         content = content_collection.find_one({"_id": liked["content_id"]})
@@ -78,24 +70,20 @@ def get_user_liked_content(t_alias_generated, limit=5):
             content_list.append(content)
     return content_list
 
-
-# Funzione per ottenere il conteggio dei likes
+# Funzione per ottenere il conteggio dei like
 def get_count_like(t_alias_generated):
-    liked_contents = content_liked_collection.find({"t_user.t_alias_generated": t_alias_generated})
-    return liked_contents.count()
-
+    liked_contents = content_liked_collection.count_documents({"t_user.t_alias_generated": t_alias_generated})
+    return liked_contents
 
 # Funzione per ottenere il conteggio dei follower
 def get_count_follower(t_alias_generated):
-    followers = follow_user_collection.find({"t_username_1": t_alias_generated})
-    return followers.count()
-
+    followers = follow_user_collection.count_documents({"t_username_2": t_alias_generated})
+    return followers
 
 # Funzione per ottenere il conteggio delle persone seguite
 def get_count_followed(t_alias_generated):
-    followed = follow_user_collection.find({"t_username_2": t_alias_generated})
-    return followed.count()
-
+    followed = follow_user_collection.count_documents({"t_username_1": t_alias_generated})
+    return followed
 
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> HttpResponse:
@@ -121,12 +109,6 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Ottieni l'alias dall'URL della richiesta
             t_alias_generated = req.params.get('t_alias_generated')
-            user = users_collection.find_one({"t_alias_generated": t_alias_generated})
-            if not user:
-                return HttpResponse(
-                    "User non trovato",
-                    status_code=404
-                )
             if not t_alias_generated:
                 return HttpResponse(
                     "Parametro t_alias_generated mancante.",
@@ -134,8 +116,8 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 )
 
             # Ottieni le informazioni dell'utente dal database
-            user_info = get_user_info(t_alias_generated)
-            if not user_info:
+            user = get_user_info(t_alias_generated)
+            if not user:
                 return HttpResponse(status_code=404)
 
             # Ottieni i contenuti dell'utente dal database (ultimi 5)
@@ -156,7 +138,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
                 "countFollowed": count_followed,
                 "countFollower": count_follower,
                 "countLike": count_like,
-                "isPublic": user_info.get("is_public", True)
+                "isPublic": user.get("is_public", True)
             }
 
             # Costruisci il corpo della risposta come oggetto JSON

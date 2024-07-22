@@ -29,7 +29,6 @@ logging.basicConfig(level=logging.INFO)
 # Ruoli permessi
 ALLOWED_ROLES = {"Utente", "Moderatore", "Super Moderatore"}
 
-
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -57,13 +56,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if not username:
                 return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
-            #Recupera l'alias e il ruolo dal database usando l'username
-            user_data = users_collection.find_one({"username": username})
+            # Recupera l'alias e il ruolo dal database usando l'username
+            user_data = users_collection.find_one({"t_username": username})
             if not user_data:
                 return func.HttpResponse("Utente non trovato.", status_code=404)
 
-            alias = user_data.get("alias")
-            role = user_data.get("role")
+            alias = user_data.get("t_alias_generated")
+            role = user_data.get("t_role")
 
             if not alias or not role:
                 return func.HttpResponse("Dati dell'utente mancanti.", status_code=400)
@@ -101,7 +100,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Crea il primo messaggio della discussione del ticket di supporto
             discussion = {
-                "support_ticket_id": ticketRes["_id"],
+                "support_ticket_id": ticketRes.inserted_id,  # Usa inserted_id per ottenere l'ID del ticket
                 "alias": alias,
                 "role": role,
                 "replyDateHour": datetime.utcnow().strftime("%d/%m/%Y %H:%M"),
@@ -121,8 +120,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
-            return func.HttpResponse("Si è verificato un errore durante la creazione del ticket di supporto.",
-                                     status_code=500)
+            return func.HttpResponse("Si è verificato un errore durante la creazione del ticket di supporto.", status_code=500)
 
     else:
         return func.HttpResponse("Metodo non supportato. Utilizzare il metodo POST.", status_code=405)

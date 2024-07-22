@@ -1,9 +1,7 @@
 import logging
 import os
-import random
-
-import jwt
 import json
+import jwt
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
@@ -13,7 +11,6 @@ load_dotenv()
 
 # Ottieni la stringa di connessione dal file delle variabili d'ambiente
 connectString = os.getenv("DB_CONNECTION_STRING")
-
 client = MongoClient(connectString)
 
 # Seleziona il database
@@ -44,7 +41,8 @@ SETTINGS_MAPPING = {
 
 def get_user_settings(t_username, setting_type=None):
     query = {"t_username": t_username}
-
+    logging.info(f"Query: {query}")
+    settings_to_retrieve = {value: 1 for key, value in SETTINGS_MAPPING.items()}
     if setting_type:
         if setting_type.startswith("INTERACTION"):
             settings_to_retrieve = {value: 1 for key, value in SETTINGS_MAPPING.items() if key.startswith(setting_type)}
@@ -53,13 +51,13 @@ def get_user_settings(t_username, setting_type=None):
             if not setting_path:
                 raise ValueError(f"Invalid setting type: {setting_type}")
             settings_to_retrieve = {setting_path: 1}
-    else:
-        settings_to_retrieve = {value: 1 for key, value in SETTINGS_MAPPING.items()}
 
-    settings_to_retrieve["_id"] = 0
-
-    result = user_settings_collection.find_one(query, settings_to_retrieve)
-    return result if result else {}
+    logging.info(f"Settings to retrieve: {settings_to_retrieve}")
+    
+    result = user_settings_collection.find_one({"t_username": t_username})
+    logging.info(f"Result: {result}")
+    del result["_id"]
+    return result["settings"] if result else {}
 
 
 # Funzione principale dell'Azure Function
@@ -108,6 +106,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # Recupera le impostazioni utente dal database
             try:
                 settings = get_user_settings(t_username, setting_type)
+                logging.info(f"Settings for {t_username}: {settings}")
 
                 return func.HttpResponse(
                     body=json.dumps(settings),

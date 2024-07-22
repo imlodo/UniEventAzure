@@ -4,6 +4,9 @@ from pymongo import MongoClient
 from werkzeug.security import generate_password_hash
 import random
 import string
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Connessione al cluster di MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
@@ -46,6 +49,7 @@ def insert_users():
             "t_type": "CREATOR",
             "t_role": random.choice(roles)
         }
+        print(f"Username: {user['t_username']}, Password: {user['t_password']}, Tipo: {user['t_type']}, Ruolo: {user['t_role']}")
         user["t_password"] = generate_password_hash(user["t_password"])  # Hash della password
         users.append(user)
     
@@ -61,6 +65,7 @@ def insert_users():
             "t_type": "COMPANY",
             "t_role": random.choice(roles)
         }
+        print(f"Username: {user['t_username']}, Password: {user['t_password']}, Tipo: {user['t_type']}, Ruolo: {user['t_role']}")
         user["t_password"] = generate_password_hash(user["t_password"])  # Hash della password
         users.append(user)
 
@@ -76,6 +81,7 @@ def insert_users():
             "t_type": "ARTIST",
             "t_role": random.choice(roles)
         }
+        print(f"Username: {user['t_username']}, Password: {user['t_password']}, Tipo: {user['t_type']}, Ruolo: {user['t_role']}")
         user["t_password"] = generate_password_hash(user["t_password"])  # Hash della password
         users.append(user)
 
@@ -93,15 +99,12 @@ def insert_users():
             "t_type": random.choice(user_types_creator),  # Solo CREATOR per Moderatori e Super Moderatori
             "t_role": role
         }
+        print(f"Username: {user['t_username']}, Password: {user['t_password']}, Tipo: {user['t_type']}, Ruolo: {user['t_role']}")
         user["t_password"] = generate_password_hash(user["t_password"])  # Hash della password
         users.append(user)
     
     # Inserisci i documenti nella collezione
     users_collection.insert_many(users)
     
-    # Stampa gli utenti e le password non cifrate
-    for user in users:
-        print(f"Username: {user['t_username']}, Password: {user['t_password'].replace('pbkdf2:sha256:50000$', '')}")  # Rimuove l'hash dalla stampa
-
 # Esegui lo script di inserimento
 insert_users()

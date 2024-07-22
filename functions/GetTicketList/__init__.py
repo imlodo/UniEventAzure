@@ -21,10 +21,9 @@ db = client.unieventmongodb
 
 # Seleziona la collezione dei biglietti
 tickets_collection = db.Tickets
-
+content_collection = db.Contents
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
-
 
 # Funzione principale dell'Azure Function
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -57,16 +56,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 return func.HttpResponse("Token non contiene un username valido.", status_code=401)
 
             # Recupera i biglietti dal database
-            tickets = tickets_collection.find({"username": username})
+            tickets = tickets_collection.find({"t_username": username})
 
             ticket_list = []
             for ticket in tickets:
+                # Converti la stringa della data e ora nel formato corretto
+                creation_date_str = ticket.get("creation_date")
+                if creation_date_str:
+                    try:
+                        parsed_date = datetime.strptime(creation_date_str, "%Y-%m-%dT%H:%M:%S.%f")
+                        formatted_date = parsed_date.strftime("%d/%m/%Y")
+                    except ValueError:
+                        # Gestisci il caso di errore se la stringa della data non è nel formato previsto
+                        formatted_date = creation_date_str
+                else:
+                    formatted_date = "Data non disponibile"
+                
+                event_name = content_collection.find_one({"_id":ticket.get("event_id")}).get("t_caption")
                 ticket_data = {
-                    "ticket_id": ticket.get("ticket_id"),
-                    "event_name": ticket.get("event_name"),
-                    "event_id": ticket.get("t_event_id"),
-                    "status": "Confermato" if ticket.get("status") == "confirmed" else "Annullato",
-                    "creation_date": datetime.strptime(ticket.get("creation_date"), "%Y-%m-%d").strftime("%d/%m/%Y")
+                    "ticket_id": str(ticket.get("_id")),
+                    "event_name": event_name,
+                    "event_id": str(ticket.get("event_id")),
+                    "status": "Confermato" if ticket.get("status") == "Confermato" or ticket.get("status") == "confirmed" else "Annullato",
+                    "creation_date": formatted_date
                 }
                 ticket_list.append(ticket_data)
 

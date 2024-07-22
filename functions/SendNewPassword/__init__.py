@@ -86,7 +86,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             {"$set": {"t_password": hashed_password}}
         )
 
-        email = user['t_email']
+        email = user['t_username']
         send_reset_password_email(email, new_password)
         response_body = json.dumps(
             {"message": "Password resettata correttamente. Verifica la tua email per la nuova password."})

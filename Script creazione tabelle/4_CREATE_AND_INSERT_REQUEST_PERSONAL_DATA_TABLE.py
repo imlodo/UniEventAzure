@@ -3,7 +3,9 @@ import pymongo
 from pymongo import MongoClient
 from datetime import datetime
 import random
+from dotenv import load_dotenv
 
+load_dotenv()
 # Connessione al cluster di MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
 client = MongoClient(connectString)

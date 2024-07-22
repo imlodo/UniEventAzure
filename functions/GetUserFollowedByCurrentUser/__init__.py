@@ -21,7 +21,8 @@ follow_user_collection = db.FollowUser
 
 
 def get_followed_users(t_username, limit=None):
-    followed_aliases = follow_user_collection.find({"t_alias_generated_from": t_username},
+    user = users_collection.find_one({"t_username": t_username})
+    followed_aliases = follow_user_collection.find({"t_alias_generated_from": user.get("t_alias_generated")},
                                                    {"t_alias_generated_to": 1, "_id": 0})
     followed_aliases = [follow['t_alias_generated_to'] for follow in followed_aliases]
 

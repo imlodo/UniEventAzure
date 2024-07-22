@@ -4,6 +4,9 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import random
 import string
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Connessione al cluster di MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
@@ -23,17 +26,17 @@ event_maps_collection = db.EventMaps
 object_maps_collection = db.ObjectMaps
 object_seats_collection = db.ObjectSeats
 event_coupons_collection = db.EventCoupon
-users_collection = db.User
+users_collection = db.Users
 
 # Dati di esempio per i topics e gli eventi
 topics_aliases = ["davidestrianese", "mariobaldi", "francescoferrara"]
 events_aliases = ["chiaraferragni", "salmo", "discosalerno", "discominori"]
 all_aliases = topics_aliases + events_aliases
-tags = ["tag1", "tag2", "tag3", "tag4", "tag5"]  # Esempio di tag
-cities = ["Rome", "Milan", "Naples", "Turin", "Palermo"]  # Esempio di città
-provinces = ["RM", "MI", "NA", "TO", "PA"]  # Esempio di province
-states = ["Italy"]  # Esempio di stati
-locations = ["Stadium", "Concert Hall", "Theater", "Club", "Arena"]  # Esempio di location
+tags = ["tag1", "tag2", "tag3", "tag4", "tag5"]
+cities = ["Rome", "Milan", "Naples", "Turin", "Palermo"]
+provinces = ["RM", "MI", "NA", "TO", "PA"]
+states = ["Italy"]
+locations = ["Stadium", "Concert Hall", "Theater", "Club", "Arena"]
 
 # Funzione per generare una stringa casuale
 def random_string(length=10):
@@ -42,28 +45,20 @@ def random_string(length=10):
 # Recupera tutti gli utenti dal database
 users = list(users_collection.find({}))
 
-# Inserisci contenuti
-def insert_contents():
+# Funzione per ottenere una data casuale
+def random_date(days_range=365):
+    return (datetime.now() + timedelta(days=random.randint(0, days_range))).strftime("%Y-%m-%d")
+
+def insert_contents(batch_size=10):
     contents = []
-    content_tags = []
-    content_mentions = []
-    content_booked = []
-    content_discussions = []
-    discussion_likes = []
-    content_likes = []
-    event_locations = []
-    event_maps = []
-    object_maps = []
-    object_seats = []
-    event_coupons = []
-    
-    # Genera un gruppo ID unico per gli eventi
     group_id = 1
-    
-    for i in range(30):
-        content_type = "Topics" if i < 15 else "Eventi"  # 15 Topics e 15 Eventi
+
+    for i in range(batch_size):
+        if i % 3 == 0:
+            group_id += 1
+        content_type = "Topics" if i < batch_size / 2 else "Eventi"
         t_alias_generated = random.choice(topics_aliases) if content_type == "Topics" else random.choice(events_aliases)
-        
+
         content = {
             "n_group_id": group_id if content_type == "Eventi" else None,
             "t_alias_generated": t_alias_generated,
@@ -75,102 +70,112 @@ def insert_contents():
             "t_privacy": random.choice(["public", "private"]),
             "b_active": random.choice([True, False]),
             "n_click": random.randint(0, 1000),
-            "t_event_date": (datetime.now() + timedelta(days=random.randint(0, 365))).strftime("%Y-%m-%d") if content_type == "Eventi" else ""
+            "t_event_date": random_date() if content_type == "Eventi" else ""
         }
-        
-        # Aggiungi il contenuto alla lista dei contenuti
         contents.append(content)
-        
+
+    # Inserisci i contenuti e ottieni gli ID generati
+    inserted_contents = contents_collection.insert_many(contents)
+    content_ids = inserted_contents.inserted_ids
+    return content_ids
+
+def insert_related_data(content_ids):
+    content_tags = []
+    content_mentions = []
+    content_booked = []
+    content_likes = []
+    discussion_likes = []
+
+    for content_id in content_ids:
+        content = contents_collection.find_one({"_id": content_id})
+
         # Genera e aggiungi tag
-        for _ in range(random.randint(1, 5)):  # Ogni contenuto avrà tra 1 e 5 tag
-            tag = {
-                "value": random.choice(tags),
-                "content_id": str(content["_id"])  # Usa l'ID del contenuto
-            }
+        for _ in range(random.randint(1, 5)):
+            tag = {"value": random.choice(tags), "content_id": content_id}
             content_tags.append(tag)
-        
+
         # Genera e aggiungi menzioni
-        for _ in range(random.randint(1, 3)):  # Ogni contenuto avrà tra 1 e 3 menzioni
-            mention = {
-                "value": random.choice(all_aliases),
-                "content_id": str(content["_id"])  # Usa l'ID del contenuto
-            }
+        for _ in range(random.randint(1, 3)):
+            mention = {"value": random.choice(all_aliases), "content_id": content_id}
             content_mentions.append(mention)
-        
+
         # Genera e aggiungi preferiti
         user = random.choice(users)
-        booked = {
-            "content_id": str(content["_id"]),
-            "t_username": user["t_username"],
-            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        booked = {"content_id": content_id, "t_username": user["t_username"], "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         content_booked.append(booked)
-        
+
         # Genera likes per il contenuto
-        like_count = random.randint(1, 10)  # Numero casuale di like per ogni contenuto
+        like_count = random.randint(1, 10)
         for _ in range(like_count):
             like_user = random.choice(users)
-            content_like = {
-                "content_id": str(content["_id"]),
-                "t_username": like_user["t_username"],
-                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+            content_like = {"content_id": content_id, "t_username": like_user["t_username"], "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             content_likes.append(content_like)
-        
-        # Genera commenti e risposte per ogni contenuto
-        for _ in range(5):  # 5 commenti per ogni contenuto
+
+    content_tags_collection.insert_many(content_tags)
+    content_mentions_collection.insert_many(content_mentions)
+    content_booked_collection.insert_many(content_booked)
+    content_likes_collection.insert_many(content_likes)
+
+    # Inserisci discussioni e like per le discussioni
+    insert_discussions(content_ids)
+
+def insert_discussions(content_ids):
+    content_discussions = []
+    discussion_likes = []
+
+    for content_id in content_ids:
+        for _ in range(5):
             comment_user = random.choice(users)
             comment = {
-                "content_id": str(content["_id"]),
+                "content_id": content_id,
                 "parent_discussion_id": "",
                 "body": f"Comment body {random_string(20)}",
-                "like_count": random.randint(0, 5),  # Like count casuale per il commento
+                "like_count": random.randint(0, 5),
                 "t_alias_generated": comment_user["t_username"],
                 "created_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "t_alias_generated_reply": ""
             }
-            content_discussions.append(comment)
-            
-            # Genera likes per il commento
+            content_discussion_collection.insert_one(comment)
+            comment_id = comment["_id"]
+
             for _ in range(comment["like_count"]):
                 like_user = random.choice(users)
-                like = {
-                    "content_id": str(content["_id"]),
-                    "discussion_id": str(comment["_id"]),
-                    "t_username": like_user["t_username"],
-                    "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }
+                like = {"content_id": content_id, "discussion_id": comment_id, "t_username": like_user["t_username"], "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 discussion_likes.append(like)
-            
-            # Genera risposte per ogni commento
-            for _ in range(2):  # 2 risposte per ogni commento
+
+            for _ in range(2):
                 reply_user = random.choice(users)
                 reply = {
-                    "content_id": str(content["_id"]),
-                    "parent_discussion_id": str(comment["_id"]),
+                    "content_id": content_id,
+                    "parent_discussion_id": comment_id,
                     "body": f"Reply body {random_string(20)}",
-                    "like_count": random.randint(0, 5),  # Like count casuale per la risposta
+                    "like_count": random.randint(0, 5),
                     "t_alias_generated": reply_user["t_username"],
                     "created_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "t_alias_generated_reply": comment["t_alias_generated"]
                 }
-                content_discussions.append(reply)
-                
-                # Genera likes per la risposta
+                content_discussion_collection.insert_one(reply)
+                reply_id = reply["_id"]
+
                 for _ in range(reply["like_count"]):
                     like_user = random.choice(users)
-                    like = {
-                        "content_id": str(content["_id"]),
-                        "discussion_id": str(reply["_id"]),
-                        "t_username": like_user["t_username"],
-                        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }
+                    like = {"content_id": content_id, "discussion_id": reply_id, "t_username": like_user["t_username"], "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                     discussion_likes.append(like)
-        
-        # Genera e aggiungi location per gli eventi
-        if content_type == "Eventi":
+
+    discussion_likes_collection.insert_many(discussion_likes)
+
+def insert_event_data(content_ids):
+    event_locations = []
+    event_maps = []
+    object_seats = []
+    event_coupons = []
+
+    for content_id in content_ids:
+        content = contents_collection.find_one({"_id": content_id})
+
+        if content["t_type"] == "Eventi":
             event_location = {
-                "event_id": str(content["_id"]),
+                "event_id": content_id,
                 "t_address": f"{random_string(5)} Main St",
                 "t_cap": random.randint(10000, 99999),
                 "t_city": random.choice(cities),
@@ -179,25 +184,22 @@ def insert_contents():
                 "t_state": random.choice(states)
             }
             event_locations.append(event_location)
-            
-            # Genera e aggiungi mappe per gli eventi
+
             map_columns = random.randint(3, 10)
             map_rows = random.randint(3, 10)
             total_seats = map_columns * map_rows
-            
+
             event_map = {
                 "t_map_name": f"Map {random_string(5)}",
-                "t_map_event_id": str(content["_id"]),
+                "t_map_event_id": content_id,
                 "t_map_type": "DISCOTECA",
                 "t_map_num_column": map_columns,
                 "t_map_num_rows": map_rows,
                 "t_map_total_seat": total_seats
             }
-            event_maps.append(event_map)
-            
+            event_maps_collection.insert_one(event_map)
             map_id = event_map["_id"]
-            
-            # Genera e aggiungi oggetti della mappa
+
             for _ in range(total_seats):
                 x = random.randint(0, map_rows - 1)
                 y = random.randint(0, map_columns - 1)
@@ -208,7 +210,7 @@ def insert_contents():
                 limit_buy = random.randint(min_person, max_person)
                 price = random.uniform(10, 100)
                 is_acquistabile = random.choice([True, False])
-                
+
                 object_map = {
                     "n_id_map": map_id,
                     "n_min_num_person": min_person,
@@ -226,45 +228,37 @@ def insert_contents():
                     "t_type": {"TABLE": {"DISCOTECA": True}},
                     "is_acquistabile": is_acquistabile
                 }
-                object_maps.append(object_map)
-                
+                object_maps_collection.insert_one(object_map)
                 object_map_id = object_map["_id"]
-                
-                # Genera e aggiungi posti a sedere per ogni oggetto della mappa
+
                 for seat_num in range(total_seats):
                     seat = {
                         "n_seat_num": seat_num,
                         "n_object_map_id": object_map_id,
-                        "n_id_event": str(content["_id"]),
+                        "n_id_event": content_id,
                         "is_sell": random.choice([True, False]),
                         "is_acquistabile": is_acquistabile
                     }
                     object_seats.append(seat)
-            
-            # Genera e aggiungi coupon per gli eventi
-            for _ in range(5):  # 5 coupon per ogni evento
+
+            for _ in range(5):
                 coupon = {
-                    "event_id": str(content["_id"]),
+                    "event_id": content_id,
                     "coupon_code": f"COUPON{random_string(5).upper()}",
-                    "discount": random.randint(1, 100)  # Sconto tra 1 e 100
+                    "discount": random.randint(1, 100)
                 }
                 event_coupons.append(coupon)
-    
-    # Inserisci i documenti nelle rispettive collezioni
-    contents_collection.insert_many(contents)
-    content_tags_collection.insert_many(content_tags)
-    content_mentions_collection.insert_many(content_mentions)
-    content_booked_collection.insert_many(content_booked)
-    content_discussion_collection.insert_many(content_discussions)
-    discussion_likes_collection.insert_many(discussion_likes)
-    content_likes_collection.insert_many(content_likes)
+
     event_location_collection.insert_many(event_locations)
-    event_maps_collection.insert_many(event_maps)
-    object_maps_collection.insert_many(object_maps)
     object_seats_collection.insert_many(object_seats)
     event_coupons_collection.insert_many(event_coupons)
-    
-    print("Contenuti, tag, menzioni, preferiti, discussioni, like discussioni, like contenuti, location eventi, mappe eventi, oggetti mappe, posti a sedere e coupon eventi inseriti con successo.")
 
-# Esegui lo script di inserimento
-insert_contents()
+def main():
+    batch_size = 30  # Numero di contenuti da inserire in ogni batch
+    content_ids = insert_contents(batch_size)
+    insert_related_data(content_ids)
+    insert_event_data(content_ids)
+    print("Dati inseriti con successo.")
+
+if __name__ == "__main__":
+    main()

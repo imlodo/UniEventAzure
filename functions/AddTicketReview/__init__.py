@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from random import random
 
+from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
@@ -76,8 +77,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # Crea un nuovo record per la recensione o aggiorna l'esistente
             review = {
                 "t_username": username,
-                "t_ticket_id": ticket_id,
-                "t_event_id": event_id,
+                "t_ticket_id": ObjectId(ticket_id),
+                "t_event_id": ObjectId(event_id),
                 "t_title": title,
                 "t_body": body,
                 "n_star": star,
@@ -86,12 +87,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             }
 
             # Cerca se esiste già una recensione per l'utente e il biglietto
-            existing_review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ticket_id})
+            existing_review = reviews_collection.find_one({"t_username": username, "t_ticket_id": ObjectId(ticket_id)})
 
             if existing_review:
                 # Aggiorna la recensione esistente
                 reviews_collection.update_one(
-                    {"t_username": username, "t_ticket_id": ticket_id},
+                    {"t_username": username, "t_ticket_id": ObjectId(ticket_id)},
                     {"$set": review}
                 )
                 response_message = "Recensione aggiornata con successo."
