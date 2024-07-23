@@ -1,6 +1,8 @@
 import logging
 import os
 import json
+
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -22,6 +24,30 @@ content_discussion_collection = db.ContentDiscussion
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+def count_records(countType, params):
+    if 'content_id' not in params:
+        raise ValueError("Il parametro content_id è obbligatorio.")
+    else:
+        filter_params = {
+            'content_id': params['content_id'],
+        }
+
+    if countType == 'Booked':
+        collection = db.ContentBooked
+        count = collection.count_documents(filter_params)
+
+    elif countType == 'Discussion':
+        collection = db.ContentDiscussion
+        count = collection.count_documents(filter_params)
+
+    elif countType == 'Like':
+        collection = db.ContentLike
+        count = collection.count_documents(filter_params)
+
+    else:
+        raise ValueError(f"countType '{countType}' non valido.")
+
+    return count
 
 def get_content_by_current_user(t_alias_generated):
     # Trova tutti i documenti nella collezione dei contenuti con l'alias specificato
@@ -90,6 +116,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             for content in content_list:
                 if '_id' in content:
                     content['_id'] = str(content['_id'])
+                content['numOfComment']=count_records("Discussion", {"content_id": ObjectId(content["_id"])})
+                content['numOfLike']=count_records("Like", {"content_id": ObjectId(content["_id"])})
+                content['numOfBooked']=count_records("Booked", {"content_id": ObjectId(content["_id"])})
 
             response_body = json.dumps({"content_list": content_list})
 

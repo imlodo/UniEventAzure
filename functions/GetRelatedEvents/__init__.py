@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 
 import jwt
+from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
@@ -21,6 +22,18 @@ db = client.unieventmongodb
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
+
+
+def serialize_document(doc):
+    """Converte ObjectId e altri tipi non serializzabili in stringhe."""
+    if isinstance(doc, list):
+        return [serialize_document(item) for item in doc]
+    elif isinstance(doc, dict):
+        return {key: serialize_document(value) for key, value in doc.items()}
+    elif isinstance(doc, ObjectId):
+        return str(doc)
+    else:
+        return doc
 
 
 # Funzione principale dell'Azure Function
@@ -62,42 +75,49 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             events = db.Contents.find({"n_group_id": int(n_group_id)})
 
             event_details = []
-            for event in events:
-                event_id = event.get("id")
-                t_alias_generated = event.get("t_user").get("t_alias_generated")
+            for eventEl in events:
+                event_id = eventEl.get("_id")
+                t_alias_generated = eventEl.get("t_alias_generated")
 
                 # Recupera l'utente
                 user = db.Users.find_one({"t_alias_generated": t_alias_generated})
 
                 # Recupera le mappe
-                maps = list(db.EventMaps.find({"t_map_event_id": event_id}))
+                maps = list(db.EventMaps.find({"t_map_event_id": ObjectId(event_id)}))
                 for map_item in maps:
-                    t_map_id = map_item.get("t_map_id")
+                    t_map_id = map_item.get("_id")
 
                     # Recupera gli oggetti della mappa
                     object_maps = list(db.ObjectMaps.find({"n_id_map": t_map_id}))
                     map_item["t_object_maps"] = object_maps
 
                 # Recupera le recensioni
-                reviews = list(db.TicketReviews.find({"event_id": event_id}))
-
+                reviews = list(db.TicketReviews.find({"t_event_id": ObjectId(event_id)}))
+                reviews_list = []
+                for review in reviews:
+                    reviewEdit = review
+                    reviewEdit["t_user"]={
+                        #mock per velocizzare
+                        t_alias_generated: eventEl.get("t_alias_generated")
+                    }
+                    reviews_list.append(reviewEdit)
                 # Recupera la location
-                location = db.EventLocation.find_one({"event_id": event_id})
+                location = db.EventLocation.find_one({"event_id": ObjectId(event_id)})
 
                 # Costruisci l'oggetto EventDetail
                 event_detail = {
-                    "id": event_id,
-                    "n_group_id": event.get("n_group_id"),
-                    "n_click": event.get("n_click"),
-                    "t_caption": event.get("t_caption"),
-                    "t_image_link": event.get("t_image_link"),
-                    "t_event_date": event.get("t_event_date"),
-                    "t_map_list": maps,
-                    "t_reviews": reviews,
-                    "t_user": user,
-                    "t_location": location,
-                    "b_active": event.get("b_active"),
-                    "t_privacy": event.get("t_privacy")
+                    "id": str(event_id),
+                    "n_group_id": eventEl.get("n_group_id"),
+                    "n_click": eventEl.get("n_click"),
+                    "t_caption": eventEl.get("t_caption"),
+                    "t_image_link": eventEl.get("t_image_link"),
+                    "t_event_date": eventEl.get("t_event_date"),
+                    "t_map_list": serialize_document(maps),
+                    "t_reviews": serialize_document(reviews_list),
+                    "t_user": serialize_document(user),
+                    "t_location": serialize_document(location),
+                    "b_active": eventEl.get("b_active"),
+                    "t_privacy": eventEl.get("t_privacy")
                 }
 
                 event_details.append(event_detail)

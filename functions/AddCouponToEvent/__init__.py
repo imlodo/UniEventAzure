@@ -1,6 +1,7 @@
 import logging
 import os
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -66,20 +67,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             t_alias_generated = user.get('t_alias_generated')
 
             # Trova il contenuto
-            content = content_collection.find_one({"_id": content_id, "t_alias_generated": t_alias_generated})
+            content = content_collection.find_one({"_id": ObjectId(content_id), "t_alias_generated": t_alias_generated})
             if not content:
                 return func.HttpResponse("Contenuto non trovato o l'utente non è autorizzato.", status_code=404)
 
             # Aggiungi il coupon
             new_coupon = {
-                "coupon_id": str(pymongo.collection.ObjectId()),
-                "event_id": content_id,
+                "event_id": ObjectId(content_id),
                 "coupon_code": coupon_code,
                 "discount": discount
             }
 
             coupon = coupons_collection.insert_one(new_coupon)
-
+            coupon = coupons_collection.find_one({"_id": ObjectId(coupon.inserted_id)})
             return func.HttpResponse(
                 json.dumps({"coupon": coupon}, default=str),
                 status_code=200,

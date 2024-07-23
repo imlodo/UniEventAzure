@@ -69,29 +69,31 @@ def add_user(data):
         # Aggiungi le impostazioni utente di default
         default_settings = {
             "t_username": data.get('t_username'),
-            "privacy": {
-                "visibility": {
-                    "private_account": False,
-                    "show_booked": True
+            "settings":{
+                "privacy": {
+                    "visibility": {
+                        "private_account": False,
+                        "show_booked": True
+                    },
+                    "messages": {
+                        "all_user_send_message": True
+                    }
                 },
-                "messages": {
-                    "all_user_send_message": True
-                }
-            },
-            "notification": {
-                "desktop": {
-                    "browser_consent": True
-                },
-                "interaction": {
-                    "like": True,
-                    "comments": True,
-                    "tag": True,
-                    "new_follower_request": True,
-                    "follower_suggest": True,
-                    "terms_and_condition": True,
-                    "payments": True,
-                    "tickets": True
-                }
+                "notification": {
+                    "desktop": {
+                        "browser_consent": True
+                    },
+                    "interaction": {
+                        "like": True,
+                        "comments": True,
+                        "tag": True,
+                        "new_follower_request": True,
+                        "follower_suggest": True,
+                        "terms_and_condition": True,
+                        "payments": True,
+                        "tickets": True
+                    }
+                }    
             }
         }
         user_settings_collection.insert_one(default_settings)

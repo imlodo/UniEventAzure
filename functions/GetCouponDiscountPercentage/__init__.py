@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -40,21 +41,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             jwt_token = auth_header.split(' ')[1]
 
             # Ottieni il buy token dall'header Buy-Token
-            buy_token = req.headers.get('Buy-Token')
-            if not buy_token or not buy_token.startswith('Bearer '):
-                return func.HttpResponse(
-                    "Buy token non valido.",
-                    status_code=401
-                )
-
-            buy_jwt_token = buy_token.split(' ')[1]
+            # buy_token = req.headers.get('Buy-Token')
+            # if not buy_token or not buy_token.startswith('Bearer '):
+            #     return func.HttpResponse(
+            #         "Buy token non valido.",
+            #         status_code=401
+            #     )
+            # 
+            # buy_jwt_token = buy_token.split(' ')[1]
 
             # Decodifica i token JWT
             secret_key = os.getenv('JWT_SECRET_KEY')
 
             try:
                 decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
-                decoded_buy_token = jwt.decode(buy_jwt_token, secret_key, algorithms=['HS256'])
+                # decoded_buy_token = jwt.decode(buy_jwt_token, secret_key, algorithms=['HS256'])
             except jwt.ExpiredSignatureError:
                 return func.HttpResponse(
                     "Token scaduto.",
@@ -84,12 +85,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Cerca il coupon nel database
-            coupon = event_coupon_collection.find_one({"event_id": event_id, "coupon_code": coupon_code})
+            coupon = event_coupon_collection.find_one({"event_id": ObjectId(event_id), "coupon_code": coupon_code})
             if coupon:
                 # Prepara la risposta
                 coupon_data = {
                     "coupon_id": str(coupon.get('_id')),
-                    "event_id": coupon.get('event_id'),
+                    "event_id": str(coupon.get('event_id')),
                     "coupon_code": coupon.get('coupon_code'),
                     "discount": coupon.get('discount')
                 }

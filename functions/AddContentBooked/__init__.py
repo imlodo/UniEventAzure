@@ -5,6 +5,7 @@ from enum import Enum
 from random import random
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -101,11 +102,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=404
             )
 
-        t_username = user.get('username')
+        t_username = user.get('t_username')
 
-        existing_record = content_booked_collection.find_one({"content_id": content_id, "t_username": t_username})
+        existing_record = content_booked_collection.find_one({"content_id": ObjectId(content_id), "t_username": t_username})
         if existing_record:
-            content_booked_collection.delete_one({"content_id": content_id, "t_username": t_username})
+            content_booked_collection.delete_one({"content_id": ObjectId(content_id), "t_username": t_username})
             return func.HttpResponse(
                 body=json.dumps({"booked": False,"message": "Contenuto rimosso dai preferiti"}),
                 status_code=201,
@@ -114,7 +115,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Crea un nuovo record nella tabella CONTENT_BOOKED
         new_record = {
-            "content_id": content_id,
+            "content_id": ObjectId(content_id),
             "t_username": t_username,
             "created_at": datetime.utcnow()
         }

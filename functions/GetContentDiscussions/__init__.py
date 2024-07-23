@@ -3,6 +3,7 @@ import logging
 import os
 import azure.functions as func
 import jwt
+from bson import ObjectId
 from pymongo import MongoClient
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
@@ -51,12 +52,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Recupera i commenti per il content_id dato
-        comments = discussion_collection.find({"content_id": content_id, "parent_discussion_id": {"$exists": False}})
+        comments = discussion_collection.find({"content_id": ObjectId(content_id)})
         comment_list = []
         for comment in comments:
-            discussion_id = comment.get('discussion_id')
+            discussion_id = comment.get('_id')
             is_liked_by_current_user = discussion_like_collection.count_documents({
-                "discussion_id": discussion_id,
+                "discussion_id": ObjectId(discussion_id),
                 "t_username": t_username
             }) > 0
 
@@ -65,10 +66,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Recupera i commenti figli
             children = []
-            child_comments = discussion_collection.find({"parent_discussion_id": discussion_id})
+            child_comments = discussion_collection.find({"parent_discussion_id": ObjectId(discussion_id)})
             for child in child_comments:
                 child_is_liked = discussion_like_collection.count_documents({
-                    "discussion_id": child.get('discussion_id'),
+                    "discussion_id": ObjectId(child.get('discussion_id')),
                     "t_username": user.get("t_username")
                 }) > 0
 
@@ -90,7 +91,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "discussion_id": child.get('discussion_id'),
                     "body": child.get('body'),
                     "like_count": discussion_like_collection.count_documents(
-                        {"discussion_id": child.get('discussion_id')}),
+                        {"discussion_id": ObjectId(child.get('discussion_id'))}),
                     "t_user": child_t_user,
                     "created_date": child.get('created_date'),
                     "is_liked_by_current_user": child_is_liked,
@@ -98,10 +99,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 })
 
             comment_list.append({
-                "content_id": comment.get('content_id'),
-                "discussion_id": comment.get('discussion_id'),
+                "content_id": str(comment.get('content_id')),
+                "discussion_id": str(comment.get('_id')),
                 "body": comment.get('body'),
-                "like_count": discussion_like_collection.count_documents({"discussion_id": discussion_id}),
+                "like_count": discussion_like_collection.count_documents({"discussion_id": ObjectId(discussion_id)}),
                 "t_user": user,
                 "created_date": comment.get('created_date'),
                 "is_liked_by_current_user": is_liked_by_current_user,

@@ -5,6 +5,7 @@ from enum import Enum
 import pymongo
 from datetime import datetime, timedelta
 from azure.functions import HttpResponse
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -113,9 +114,9 @@ def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order
                     {"content_id": content["_id"], "t_username": user.get('t_username')})
                 if liked_record:
                     is_liked_by_current_user = True
-            numOfComment = count_records("Discussion", {"content_id": content["_id"]})
-            numOfLike = count_records("Like", {"content_id": content["_id"]})
-            numOfBooked = count_records("Booked", {"content_id": content["_id"]})
+            numOfComment = count_records("Discussion", {"content_id": ObjectId(content["_id"])})
+            numOfLike = count_records("Like", {"content_id": ObjectId(content["_id"])})
+            numOfBooked = count_records("Booked", {"content_id": ObjectId(content["_id"])})
             content["numOfComment"] = numOfComment
             content["numOfLike"] = numOfLike
             content["numOfBooked"] = numOfBooked

@@ -21,7 +21,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione per le richieste di download dei dati personali
-requests_collection = db.PersonalDataRequest
+requests_collection = db.RequestPersonalData
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)

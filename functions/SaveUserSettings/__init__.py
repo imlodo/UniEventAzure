@@ -30,18 +30,18 @@ logging.basicConfig(level=logging.INFO)
 
 # Mappa le impostazioni possibili ai rispettivi campi nel documento
 SETTINGS_MAPPING = {
-    "PRIVATE_ACCOUNT_TOGGLE": "privacy.visibility.private_account",
-    "SHOW_BOOKED_TOGGLE": "privacy.visibility.show_booked",
-    "MESSAGE_TOGGLE": "privacy.messages.all_user_send_message",
-    "DESKTOP_NOTIFICATION_TOGGLE": "notification.desktop.browser_consent",
-    "INTERACTION_LIKE_TOGGLE": "notification.interaction.like",
-    "INTERACTION_DISCUSSION_TOGGLE": "notification.interaction.comments",
-    "INTERACTION_TAG_TOGGLE": "notification.interaction.tag",
-    "INTERACTION_NEW_FOLLOWER_TOGGLE": "notification.interaction.new_follower_request",
-    "INTERACTION_SUGGEST_FOLLOWER_TOGGLE": "notification.interaction.follower_suggest",
-    "INTERACTION_TERMS_AND_CONDITION_TOGGLE": "notification.interaction.terms_and_condition",
-    "INTERACTION_PAYMENTS_TOGGLE": "notification.interaction.payments",
-    "INTERACTION_TICKETS_TOGGLE": "notification.interaction.tickets"
+    "PRIVATE_ACCOUNT_TOGGLE": "settings.privacy.visibility.private_account",
+    "SHOW_BOOKED_TOGGLE": "settings.privacy.visibility.show_booked",
+    "MESSAGE_TOGGLE": "settings.privacy.messages.all_user_send_message",
+    "DESKTOP_NOTIFICATION_TOGGLE": "settings.notification.desktop.browser_consent",
+    "INTERACTION_LIKE_TOGGLE": "settings.notification.interaction.like",
+    "INTERACTION_DISCUSSION_TOGGLE": "settings.notification.interaction.comments",
+    "INTERACTION_TAG_TOGGLE": "settings.notification.interaction.tag",
+    "INTERACTION_NEW_FOLLOWER_TOGGLE": "settings.notification.interaction.new_follower_request",
+    "INTERACTION_SUGGEST_FOLLOWER_TOGGLE": "settings.notification.interaction.follower_suggest",
+    "INTERACTION_TERMS_AND_CONDITION_TOGGLE": "settings.notification.interaction.terms_and_condition",
+    "INTERACTION_PAYMENTS_TOGGLE": "settings.notification.interaction.payments",
+    "INTERACTION_TICKETS_TOGGLE": "settings.notification.interaction.tickets"
 }
 
 
@@ -58,16 +58,15 @@ def update_user_settings(t_username, setting_type, value):
 
     t_alias_generated = user.get("t_alias_generated")
 
-    if setting_path == "privacy.visibility.private_account" and value is True:
+    if setting_path == "settings.privacy.visibility.private_account" and value is True:
         follow_user_requests = follow_user_request_collection.find({"t_alias_generated_to": t_alias_generated})
 
         for request in follow_user_requests:
             t_alias_generated_from = request.get("t_alias_generated_from")
-            follow_user_record = {
+            follow_user_collection.insert_one({
                 "t_alias_generated_to": t_alias_generated,
                 "t_alias_generated_from": t_alias_generated_from
-            }
-            follow_user_collection.insert_one(follow_user_record)
+            })
 
     # Converti il path in dot notation in un dict per $set
     update_query = {setting_path: value}

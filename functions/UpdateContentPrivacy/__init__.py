@@ -3,6 +3,7 @@ import os
 import random
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -84,7 +85,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Ottieni il contenuto e l'utente creatore
-            content = content_collection.find_one({"_id": content_id})
+            content = content_collection.find_one({"_id": ObjectId(content_id)})
             if not content:
                 return func.HttpResponse(
                     "Contenuto non trovato.",
@@ -107,7 +108,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Aggiorna il t_privacy del contenuto
             result = content_collection.update_one(
-                {"_id": content_id},
+                {"_id": ObjectId(content_id)},
                 {"$set": {"t_privacy": new_privacy}}
             )
 

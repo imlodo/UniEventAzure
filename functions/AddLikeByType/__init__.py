@@ -4,6 +4,7 @@ import os
 from enum import Enum
 from random import random
 
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -107,9 +108,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "Il parametro content_id è obbligatorio.",
                     status_code=400
                 )
-            existing_record = content_like_collection.find_one({"content_id": content_id, "t_username": t_username})
+            existing_record = content_like_collection.find_one({"content_id": ObjectId(content_id), "t_username": t_username})
             if existing_record:
-                content_like_collection.delete_one({"content_id": content_id, "t_username": t_username})
+                content_like_collection.delete_one({"content_id": ObjectId(content_id), "t_username": t_username})
                 return func.HttpResponse(
                     body=json.dumps({"liked": False,"message": "Contenuto rimosso dai piaciuti"}),
                     status_code=201,
@@ -117,7 +118,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
             # Crea un nuovo record nella tabella CONTENT_BOOKED
             new_record = {
-                "content_id": content_id,
+                "content_id": ObjectId(content_id),
                 "t_username": t_username,
                 "created_at": datetime.utcnow()
             }
@@ -135,9 +136,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "I parametri discussion_id e content_id sono obbligatori.",
                     status_code=400
                 )
-            existing_record = discussion_like_collection.find_one({"content_id": content_id, "discussion_id": discussion_id, "t_username": t_username})
+            existing_record = discussion_like_collection.find_one({"content_id": ObjectId(content_id), "discussion_id": ObjectId(discussion_id), "t_username": t_username})
             if existing_record:
-                discussion_like_collection.delete_one({"discussion_id": discussion_id, "t_username": t_username})
+                discussion_like_collection.delete_one({"discussion_id":  ObjectId(discussion_id), "t_username": t_username})
                 return func.HttpResponse(
                     body=json.dumps({"liked": False,"message": "Commento rimosso dai piaciuti"}),
                     status_code=201,
@@ -145,8 +146,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
             # Crea un nuovo record nella tabella CONTENT_BOOKED
             new_record = {
-                "content_id": content_id,
-                "discussion_id": discussion_id,
+                "content_id": ObjectId(content_id),
+                "discussion_id": ObjectId(discussion_id),
                 "t_username": t_username,
                 "created_at": datetime.utcnow()
             }

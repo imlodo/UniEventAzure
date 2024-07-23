@@ -3,6 +3,7 @@ import os
 import random
 from datetime import datetime
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -31,7 +32,7 @@ def count_records(countType, params):
         raise ValueError("Il parametro content_id è obbligatorio.")
     else:
         filter_params = {
-            'content_id': str(params['content_id']),
+            'content_id': params['content_id'],
         }
 
     if countType == 'Booked':
@@ -50,6 +51,18 @@ def count_records(countType, params):
         raise ValueError(f"countType '{countType}' non valido.")
 
     return count
+
+
+def serialize_document(doc):
+    """Converte ObjectId e altri tipi non serializzabili in stringhe."""
+    if isinstance(doc, list):
+        return [serialize_document(item) for item in doc]
+    elif isinstance(doc, dict):
+        return {key: serialize_document(value) for key, value in doc.items()}
+    elif isinstance(doc, ObjectId):
+        return str(doc)
+    else:
+        return doc
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -108,35 +121,40 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Verifica se il contenuto esiste
-            content = content_collection.find_one({"_id": content_id})
-            maps = []
-            reviews = []
-            location = []
-
-            if content.get("type") == "Eventi":
-                #recupera le mappe
-                maps = list(db.EventMaps.find({"t_map_event_id": content_id}))
-                for map_item in maps:
-                    t_map_id = map_item.get("t_map_id")
-
-                    # Recupera gli oggetti della mappa
-                    object_maps = list(db.ObjectMaps.find({"n_id_map": t_map_id}))
-                    map_item["t_object_maps"] = object_maps
-
-                # Recupera le recensioni
-                reviews = list(db.TicketReviews.find({"event_id": content_id}))
-
-                # Recupera la location
-                location = db.EventLocation.find_one({"event_id": content_id})
-
-            content_tags = list(content_tags_collections.find({"content_id": content_id}))
-            content_mentions = list(content_mentions_collections.find({"content_id": content_id}))
-
+            content = content_collection.find_one({"_id": ObjectId(content_id)})
             if not content:
                 return func.HttpResponse(
                     "Contenuto non trovato.",
                     status_code=404
                 )
+
+            maps = []
+            reviews = []
+            location = []
+
+            if content.get("t_type") == "Eventi":
+                # recupera le mappe
+                maps = list(db.EventMaps.find({"t_map_event_id": ObjectId(content_id)}))
+                for map_item in maps:
+                    t_map_id = map_item.get("_id")
+                    map_item["t_map_id"]=t_map_id
+                    # Recupera gli oggetti della mappa
+                    object_maps = list(db.ObjectMaps.find({"n_id_map": ObjectId(t_map_id)}))
+                    for object_map in object_maps:
+                        n_object_map_id = object_map.get("_id")
+                        object_map["n_id"]=n_object_map_id
+                        seat_list = list(db.ObjectSeats.find({"n_object_map_id": ObjectId(n_object_map_id)}))
+                        object_map["t_seat_list"] = seat_list
+                    map_item["t_object_maps"] = object_maps
+
+                # Recupera le recensioni
+                reviews = list(db.TicketReviews.find({"t_event_id": ObjectId(content_id)}))
+
+                # Recupera la location
+                location = db.EventLocation.find_one({"event_id": ObjectId(content_id)})
+
+            content_tags = list(content_tags_collections.find({"content_id": ObjectId(content_id)}))
+            content_mentions = list(content_mentions_collections.find({"content_id": ObjectId(content_id)}))
 
             # Recupera i dettagli dell'utente associato al contenuto
             content_user = users_collection.find_one({"t_alias_generated": content.get("t_alias_generated")})
@@ -149,11 +167,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Prepara l'oggetto di risposta
             response_data = {
-                "id": content.get('id'),
+                "id": str(content.get('_id')),
                 "t_caption": content.get('t_caption'),
                 "t_image_link": content.get('t_image_link'),
+                "t_video_link": content.get('t_video_link'),
                 "t_user": {
-                    "id": content_user.get('id'),
+                    "id": str(content_user.get('_id')),
                     "t_name": content_user.get('t_name'),
                     "t_follower_number": content_user.get('t_follower_number'),
                     "t_alias_generated": content_user.get('t_alias_generated'),
@@ -164,20 +183,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "type": content_user.get('t_type')
                 },
                 "n_click": content.get('n_click'),
-                "type": content.get('type'),
+                "type": content.get('t_type'),
                 "created_date": content.get('created_date'),
-                "numOfComment": count_records("Discussion", {"content_id": content_id}),
-                "numOfLike": count_records("Like", {"content_id": content_id}),
-                "numOfBooked": count_records("Booked", {"content_id": content_id}),
-                "n_group_id": content.get("n_group_id") if content.get("type") == "Eventi" else None,
-                "t_event_date": content.get("t_event_date") if content.get("type") == "Eventi" else None,
-                "t_map_list": maps,
-                "t_reviews": reviews,
-                "t_location": location,
+                "numOfComment": count_records("Discussion", {"content_id": ObjectId(content_id)}),
+                "numOfLike": count_records("Like", {"content_id": ObjectId(content_id)}),
+                "numOfBooked": count_records("Booked", {"content_id": ObjectId(content_id)}),
+                "n_group_id": content.get("n_group_id") if content.get("t_type") == "Eventi" else None,
+                "t_event_date": content.get("t_event_date") if content.get("t_type") == "Eventi" else None,
+                "t_map_list": serialize_document(maps),
+                "t_reviews": serialize_document(reviews),
+                "t_location": serialize_document(location),
                 "b_active": content.get("b_active"),
                 "t_privacy": content.get("t_privacy"),
-                "tags": content_tags,
-                "mentions": content_mentions
+                "tags": serialize_document(content_tags),
+                "mentions": serialize_document(content_mentions)
             }
 
             return func.HttpResponse(

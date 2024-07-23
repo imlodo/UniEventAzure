@@ -3,6 +3,7 @@ import os
 import random
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -78,7 +79,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             coupon_id = req_body.get('coupon_id')
 
             #Ottieni il contenuto e l'utente creatore
-            coupon = coupons_collection.find_one({"_id": coupon_id})
+            coupon = coupons_collection.find_one({"_id": ObjectId(coupon_id)})
             if not coupon:
                 return func.HttpResponse(
                     "Coupon non trovato.",
@@ -93,7 +94,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Controlla se l'utente è il creatore del contenuto
-            content = content_collection.find_one({"_id": coupon.get("event_id")})
+            content = content_collection.find_one({"_id": ObjectId(coupon.get("event_id"))})
             if content.get('t_alias_generated') != user.get('t_alias_generated'):
                 return func.HttpResponse(
                     "L'utente non è autorizzato a cancellare questo coupon.",
@@ -101,7 +102,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Cancella il contenuto
-            result = coupons_collection.delete_one({"_id": coupon_id})
+            result = coupons_collection.delete_one({"_id": ObjectId(coupon_id)})
 
             if result.deleted_count == 1:
                 return func.HttpResponse(

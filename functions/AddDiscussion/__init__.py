@@ -5,6 +5,7 @@ from datetime import datetime
 
 import azure.functions as func
 import jwt
+from bson import ObjectId
 from pymongo import MongoClient
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
@@ -68,11 +69,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 created_date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
                 new_discussion = {
-                    "content_id": content_id,
-                    "parent_discussion_id": parent_discussion_id,
+                    "content_id": ObjectId(content_id),
+                    "parent_discussion_id": ObjectId(parent_discussion_id) if parent_discussion_id else None,
                     "body": body,
                     "like_count": 0,
-                    "t_user": t_user,
+                    "t_alias_generated": t_user.get("t_alias_generated"),
+                    "t_username": t_user.get("t_username"),
                     "created_date": created_date,
                     "is_liked_by_current_user": False,
                     "t_alias_generated_reply": t_alias_generated_reply
@@ -80,7 +82,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
                 result = discussion_collection.insert_one(new_discussion)
                 inserted_discussion = discussion_collection.find_one({"_id": result.inserted_id})
-
+                inserted_discussion["discussion_id"]=str(result.inserted_id)
                 return func.HttpResponse(
                     json.dumps({"discussion": inserted_discussion}, default=str),
                     status_code=200,

@@ -88,11 +88,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     "User non trovato.",
                     status_code=404
                 )
-            if not user.get("active"):
-                return func.HttpResponse(
-                    "Il tuo account è stato eliminato, contatta il supporto.",
-                    status_code=404
-                )
 
             if user:
                 # Genera il token JWT

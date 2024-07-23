@@ -19,7 +19,7 @@ client = MongoClient(connectString)
 db = client.unieventmongodb
 
 # Seleziona la collezione per le richieste di download dei dati personali
-requests_collection = db.PersonalDataRequest
+requests_collection = db.RequestPersonalData
 user_data_collection = db.Users
 
 # Setup del logger per l'Azure Function
@@ -103,7 +103,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "type_download": type_download,
                 "type_data_download": type_data_download,
                 "status": "REQUESTED",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.utcnow(),
+                "download_file": None
             }
             requests_collection.insert_one(request_data)
 

@@ -3,6 +3,7 @@ import os
 import random
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -77,7 +78,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             content_id = req_body.get('content_id')
 
             # Ottieni il contenuto e l'utente creatore
-            content = content_collection.find_one({"_id": content_id})
+            content = content_collection.find_one({"_id": ObjectId(content_id)})
             if not content:
                 return func.HttpResponse(
                     "Contenuto non trovato.",
@@ -99,7 +100,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Cancella il contenuto
-            result = content_collection.delete_one({"_id": content_id})
+            result = content_collection.delete_one({"_id": ObjectId(content_id)})
 
             if result.deleted_count == 1:
                 return func.HttpResponse(

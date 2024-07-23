@@ -6,6 +6,7 @@ from datetime import datetime
 
 import pymongo
 from azure.functions import HttpResponse
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 
@@ -31,7 +32,8 @@ def get_user_alias_from_token(token):
 
     try:
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
-        return decoded_token.get('t_alias_generated')
+        t_username = decoded_token.get('username')
+        return user_collection.find_one({"t_username": t_username}).get("t_alias_generated")
     except jwt.ExpiredSignatureError:
         raise ValueError("Token scaduto.")
     except jwt.InvalidTokenError:
@@ -40,7 +42,7 @@ def get_user_alias_from_token(token):
 
 def get_event_creator_alias(event_id):
     """Recupera l'alias dell'utente che ha creato l'evento."""
-    event = event_collection.find_one({"event_id": event_id})
+    event = event_collection.find_one({"_id": ObjectId(event_id)})
     if event:
         return event.get("t_alias_generated")
     return None
@@ -48,8 +50,19 @@ def get_event_creator_alias(event_id):
 
 def get_coupons_for_event(event_id):
     """Recupera i coupon associati all'evento."""
-    coupons = event_coupon_collection.find({"event_id": event_id})
+    coupons = event_coupon_collection.find({"event_id": ObjectId(event_id)})
     return list(coupons)
+
+
+def serialize_object_id(data):
+    """Converte ObjectId in stringa per la serializzazione JSON."""
+    if isinstance(data, list):
+        return [serialize_object_id(item) for item in data]
+    if isinstance(data, dict):
+        return {key: serialize_object_id(value) for key, value in data.items()}
+    if isinstance(data, ObjectId):
+        return str(data)
+    return data
 
 
 def main(req: func.HttpRequest) -> HttpResponse:
@@ -80,7 +93,8 @@ def main(req: func.HttpRequest) -> HttpResponse:
 
             # Recupera i coupon per l'evento
             coupons = get_coupons_for_event(event_id)
-            response_body = json.dumps({"coupons": coupons})
+            serialized_coupons = serialize_object_id(coupons)
+            response_body = json.dumps({"coupons": serialized_coupons})
 
             return HttpResponse(
                 body=response_body,

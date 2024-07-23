@@ -1,11 +1,11 @@
 import logging
 import os
+import json
 from datetime import datetime, timedelta
-import pymongo
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
-import json
+from bson import ObjectId
 
 # Connessione al cluster di Azure Cosmos DB for MongoDB
 connectString = os.getenv("DB_CONNECTION_STRING")
@@ -33,6 +33,17 @@ def get_username_from_token(token):
     except jwt.InvalidTokenError:
         return None
 
+def serialize_document(doc):
+    """Converte ObjectId e altri tipi non serializzabili in stringhe."""
+    if isinstance(doc, list):
+        return [serialize_document(item) for item in doc]
+    elif isinstance(doc, dict):
+        return {key: serialize_document(value) for key, value in doc.items()}
+    elif isinstance(doc, ObjectId):
+        return str(doc)
+    else:
+        return doc
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Get User Addresses function processed a request.')
 
@@ -54,9 +65,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             t_alias_generated = user.get('t_alias_generated')
 
             user_addresses = list(user_addresses_collection.find({"t_alias_generated": t_alias_generated}))
-            
+            serialized_user_addresses = serialize_document(user_addresses)
+
             return func.HttpResponse(
-                body=json.dumps(user_addresses),
+                body=json.dumps(serialized_user_addresses),
                 status_code=200,
                 mimetype='application/json'
             )

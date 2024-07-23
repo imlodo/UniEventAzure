@@ -5,6 +5,8 @@ from random import random
 
 import jwt
 import json
+
+from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import azure.functions as func
@@ -88,10 +90,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=404
                 )
     
-            t_username = user.get('username')
+            t_username = user.get('t_username')
 
             # Verifica se l'utente 'from' segue l'utente 'to'
-            liked_record = content_like_collection.find_one({"content_id": content_id, "t_username": t_username})
+            liked_record = content_like_collection.find_one({"content_id": ObjectId(content_id), "t_username": t_username})
 
             if liked_record:
                 return func.HttpResponse(
