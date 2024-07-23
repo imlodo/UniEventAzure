@@ -2,6 +2,59 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/AddContentBooked" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddCouponToEvent" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddDiscussion" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddLikeByType" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddSupportTicketReply" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddTicketReview" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddUserAddress" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/AddUserCard" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CheckContentIsBookedByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CheckContentIsLikedByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CheckIsFollowRequestByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CheckIsFollowedByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CreateNewTicket" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/CreateNewUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DeleteAccount" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DeleteContent" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DeleteCoupon" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DeleteFile" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DownloadFile" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/DownloadPersonalData" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/EditCoupon" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/EditUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/FollowUserRequest" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GenerateJWTToken" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GenerateJWTTokenForBuy" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GenerateVideoPreview" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetBuyTokenDetail" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetContentDiscussions" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetContentsByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetCouponDiscountPercentage" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetCouponsForEvent" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetRelatedEvents" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetRequestPersonalDataStatus" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetSingleContent" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetSupportTicketDiscussionList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetSupportTicketList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetTicketDetail" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetTicketList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetTicketReviews" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUserAddress" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUserCreditCards" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUserFollowedByCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUserProfileInfo" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetUserSettings" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/RequestPersonalData" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/SaveUserSettings" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/SendConfirmationEmail" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/SendNewPassword" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/TicketPurchase" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/UnReqFollowUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/UpdateContentPrivacy" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/UploadFile" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (functions)" jdkType="Python SDK" />

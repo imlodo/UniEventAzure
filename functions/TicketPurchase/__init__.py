@@ -1,11 +1,10 @@
 import logging
 import os
 import random
-
+from datetime import datetime
 import pymongo
 import jwt
 import azure.functions as func
-from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import json
@@ -24,6 +23,28 @@ event_coupons_collection = db.EventCoupon
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+# Funzione per decodificare il token JWT e ottenere l'username
+def get_username_from_token(token):
+    secret_key = os.getenv('JWT_SECRET_KEY')
+    try:
+        decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
+        return decoded_token.get('username')
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+# Funzione per serializzare gli oggetti MongoDB
+def serialize_document(doc):
+    """Converte ObjectId e altri tipi non serializzabili in stringhe."""
+    if isinstance(doc, list):
+        return [serialize_document(item) for item in doc]
+    elif isinstance(doc, dict):
+        return {key: serialize_document(value) for key, value in doc.items()}
+    elif isinstance(doc, ObjectId):
+        return str(doc)
+    else:
+        return doc
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -62,7 +83,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=401
                 )
 
-            #Recupera l'utente dal database usando t_username
+            # Recupera l'utente dal database usando t_username
             user = users_collection.find_one({"t_username": t_username})
             if not user:
                 return func.HttpResponse(
@@ -92,7 +113,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=404
                 )
 
-            #Verifica la carta
+            # Verifica la carta
             card = user_cards_collection.find_one(
                 {"_id": ObjectId(card_id), "t_alias_generated": user['t_alias_generated']})
             if not card:
@@ -101,7 +122,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=404
                 )
 
-            #Verifica l'indirizzo
+            # Verifica l'indirizzo
             address = user_addresses_collection.find_one(
                 {"_id": ObjectId(address_id), "t_alias_generated": user['t_alias_generated']})
             if not address:
@@ -138,17 +159,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "ticket_type": eventTicketList[0].get('t_type'),
                 # Assumendo che tutti i biglietti siano dello stesso tipo
                 "price": total_price,
-                "event_id": event_id,
-                "address_id": address_id,
-                "card_id": card_id,
-                "coupon_id": coupon_id
+                "event_id": ObjectId(event_id),
+                "address_id": ObjectId(address_id),
+                "card_id": ObjectId(card_id),
+                "coupon_id": ObjectId(coupon_id) if coupon_id else None,
+                "t_username": t_username
             }
 
             result = tickets_collection.insert_one(ticket_record)
             ticket_record['ticket_id'] = str(result.inserted_id)
+            serialized_ticket_record = serialize_document(ticket_record)
 
             return func.HttpResponse(
-                body=json.dumps(ticket_record),
+                body=json.dumps(serialized_ticket_record),
                 status_code=201 if payment_status else 400,
                 mimetype='application/json'
             )
@@ -163,12 +186,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=405
         )
 
-
 def ticket_altered(ticket):
     # Logica per verificare se il ticket è stato alterato
     # devi restituire l'oggetto memorizzato nel db corrispondente a questo passato dall'utente
     return False
-
 
 def process_payment(card, amount):
     # Logica per pagamento
