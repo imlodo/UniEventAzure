@@ -59,21 +59,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         unique_users = {}
         for message in messages:
             # Recupera i dettagli dell'utente dal database degli utenti
-            user_at = users_collection.find_one({"username": message["user_at"]})
-            user_from = users_collection.find_one({"username": message["user_from"]})
+            user_at = users_collection.find_one({"t_username": message["user_at"]})
+            user_from = users_collection.find_one({"t_username": message["user_from"]})
 
             if not user_at or not user_from:
                 continue
 
-            user_key = user_at["alias_generated"] if user_at["username"] != username else user_from["alias_generated"]
+            user_key = user_at["t_alias_generated"] if user_at["t_username"] != username else user_from["t_alias_generated"]
             if user_key not in unique_users:
                 unique_users[user_key] = {
                     "userChat": {
-                        "t_name": user_at["name"] if user_at["username"] != username else user_from["name"],
-                        "t_surname": user_at["surname"] if user_at["username"] != username else user_from["surname"],
+                        "t_name": user_at["t_name"] if user_at["t_username"] != username else user_from["t_name"],
+                        "t_surname": user_at["t_surname"] if user_at["t_username"] != username else user_from["t_surname"],
                         "t_alias_generated": user_key,
-                        "t_profile_photo": user_at.get("profile_photo") if user_at["username"] != username else user_from.get("profile_photo"),
-                        "t_type": user_at["type"] if user_at["username"] != username else user_from["type"]
+                        "t_profile_photo": user_at.get("t_profile_photo") if user_at["t_username"] != username else user_from.get("t_profile_photo"),
+                        "t_type": user_at["t_type"] if user_at["t_username"] != username else user_from["t_type"]
                     },
                     "messages": [{
                         "user_at": user_at,

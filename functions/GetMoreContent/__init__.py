@@ -33,7 +33,7 @@ def count_records(countType, params):
         raise ValueError("Il parametro content_id è obbligatorio.")
     else:
         filter_params = {
-            'content_id': str(params['content_id']),
+            'content_id': ObjectId(params['content_id']),
         }
 
     if countType == 'Booked':
@@ -61,9 +61,6 @@ def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order
     user = users_collection.find_one({"t_alias_generated": t_alias_generated})
     if t_search_str:
         query["t_caption"] = {"$regex": t_search_str, "$options": "i"}
-
-    if t_alias_generated:
-        query["t_user.t_alias_generated"] = t_alias_generated
 
     contentType = "ALL"
     match t_more_content_type:
@@ -111,23 +108,25 @@ def get_more_content(t_search_str, t_alias_generated, t_more_content_type, order
             is_liked_by_current_user = False
             if user:
                 liked_record = content_like_collection.find_one(
-                    {"content_id": content["_id"], "t_username": user.get('t_username')})
+                    {"content_id": ObjectId(content["_id"]), "t_username": user.get('t_username')})
                 if liked_record:
                     is_liked_by_current_user = True
-            numOfComment = count_records("Discussion", {"content_id": ObjectId(content["_id"])})
-            numOfLike = count_records("Like", {"content_id": ObjectId(content["_id"])})
-            numOfBooked = count_records("Booked", {"content_id": ObjectId(content["_id"])})
+            numOfComment = count_records("Discussion", {"content_id": content["_id"]})
+            numOfLike = count_records("Like", {"content_id": content["_id"]})
+            numOfBooked = count_records("Booked", {"content_id": content["_id"]})
             content["numOfComment"] = numOfComment
             content["numOfLike"] = numOfLike
             content["numOfBooked"] = numOfBooked
             content["is_liked_by_current_user"] = is_liked_by_current_user
+            userContent = users_collection.find_one({"t_alias_generated":content.get("t_alias_generated")})
+            content["t_user"] = userContent
             if '_id' in content:
                 del content['_id']
             content_list.append(content)
 
         return content_list
     else:
-        return contents
+        return list(contents)
 
 
 # Funzione principale dell'Azure Function
@@ -156,7 +155,7 @@ def main(req: func.HttpRequest) -> HttpResponse:
                                             order_direction, pageNumber, pageSize)
 
             # Costruisci il corpo della risposta come oggetto JSON
-            response_body = json.dumps({"content_list": content_list})
+            response_body = json.dumps({"content_list": content_list}, default=str)
 
             return HttpResponse(
                 body=response_body,

@@ -4,6 +4,7 @@ import pymongo
 import jwt
 from datetime import datetime
 from azure.functions import HttpResponse
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import json
@@ -72,17 +73,20 @@ def get_user_liked_content(t_alias_generated, limit=5):
 
 # Funzione per ottenere il conteggio dei like
 def get_count_like(t_alias_generated):
-    liked_contents = content_liked_collection.count_documents({"t_user.t_alias_generated": t_alias_generated})
-    return liked_contents
+    contents = content_collection.find({"t_alias_generated":t_alias_generated})
+    likeCount = 0
+    for content in contents:
+        likeCount += content_liked_collection.count_documents({"content_id": ObjectId(content.get("_id"))})
+    return likeCount
 
 # Funzione per ottenere il conteggio dei follower
 def get_count_follower(t_alias_generated):
-    followers = follow_user_collection.count_documents({"t_username_2": t_alias_generated})
+    followers = follow_user_collection.count_documents({"t_alias_generated_to": t_alias_generated})
     return followers
 
 # Funzione per ottenere il conteggio delle persone seguite
 def get_count_followed(t_alias_generated):
-    followed = follow_user_collection.count_documents({"t_username_1": t_alias_generated})
+    followed = follow_user_collection.count_documents({"t_alias_generated_from": t_alias_generated})
     return followed
 
 # Funzione principale dell'Azure Function

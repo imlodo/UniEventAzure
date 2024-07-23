@@ -55,26 +55,48 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not target_alias:
             return func.HttpResponse("Alias target non fornito.", status_code=400)
 
+        target_user = users_collection.find_one({"t_alias_generated": target_alias})
+        if not target_user:
+            return func.HttpResponse("Utente non trovato.", status_code=404)
+
         # Recupera i messaggi dal database per l'utente corrente e l'utente target
+        print(username, target_user.get("t_username"))
         messages = messages_collection.find(
             {"$or": [
-                {"$and": [{"user_to": username}, {"user_at": target_alias}]},
-                {"$and": [{"user_at": username}, {"user_to": target_alias}]}
+                {"$and": [{"user_from": username}, {"user_at": target_user.get("t_username")}]},
+                {"$and": [{"user_at": username}, {"user_from": target_user.get("t_username")}]}
             ]}
         ).sort("dateTime", -1)
-
         # Creazione della lista dei messaggi
         messages_list = []
         for message in messages:
-            user_to = users_collection.find_one({"username": message["user_to"]})
-            user_at = users_collection.find_one({"username": message["user_at"]})
+            user_to = users_collection.find_one({"t_username": message["user_from"]})
+            user_at = users_collection.find_one({"t_username": message["user_at"]})
 
             if not user_to or not user_at:
                 continue
 
             messages_list.append({
-                "user_to": user_to,
-                "user_at": user_at,
+                "user_from": {
+                    "_id": str(user_to["_id"]),
+                    "username": user_to["t_username"],
+                    "t_alias_generated": user_to.get("t_alias_generated"),
+                    "is_verified": user_to.get("is_verified"),
+                    "t_profile_photo":user_to.get("t_profile_photo"),
+                    "t_type":user_to.get("t_type"),
+                    "t_role":user_to.get("t_role"),
+                    "t_description":user_to.get("t_description")
+                },
+                "user_at": {
+                    "_id": str(user_at["_id"]),
+                    "username": user_at["t_username"],
+                    "t_alias_generated": user_at.get("t_alias_generated"),
+                    "is_verified": user_at.get("is_verified"),
+                    "t_profile_photo":user_at.get("t_profile_photo"),
+                    "t_type":user_at.get("t_type"),
+                    "t_role":user_at.get("t_role"),
+                    "t_description":user_at.get("t_description")
+                },
                 "message": message["message"],
                 "dateTime": message["dateTime"]
             })

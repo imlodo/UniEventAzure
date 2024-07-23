@@ -55,6 +55,20 @@
       <sourceFolder url="file://$MODULE_DIR$/UnReqFollowUser" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/UpdateContentPrivacy" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/UploadFile" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/ChatWebSocket" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/FollowUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetChatList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetChatMessageList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetMoreContent" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetMoreContentBasedOnCurrentUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetProfileUserSettings" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetVerifyAccountList" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/GetVerifyAccountStatus" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/Negotiate" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/UnfollowUser" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/UpdateVerifyAccount" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/VerifyAccount" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/VerifyToken" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (functions)" jdkType="Python SDK" />

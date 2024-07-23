@@ -80,14 +80,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     status_code=404
                 )
 
-            # Verifica il ruolo dell'utente
-            user_role = user.get('t_role')
-            if user_role not in [USER_ROLE.MODERATORE.value, USER_ROLE.SUPERMODERATORE.value]:
-                return func.HttpResponse(
-                    "Permessi insufficienti.",
-                    status_code=403
-                )
-
             # Ottieni l'username dalla query string
             query_alias = req.params.get('t_alias_generated')
             if not query_alias:
@@ -123,7 +115,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
             else:
                 return func.HttpResponse(
-                    "Utente non trovato.",
+                    "Richiesta non trovata.",
                     status_code=404
                 )
 

@@ -23,6 +23,7 @@ db = client.unieventmongodb
 # Seleziona le collezioni per i ticket di supporto e le discussioni
 support_tickets_collection = db.SupportTickets
 support_ticket_discussion_collection = db.SupportTicketDiscussion
+users_collection = db.Users
 
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
@@ -62,7 +63,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Verifica se l'utente è associato al ticket
             ticket = support_tickets_collection.find_one({"_id": ObjectId(ticket_id), "t_username": username})
-            if not ticket:
+            user = users_collection.find_one({"t_username": username})
+            if not ticket and user.get("t_role") is "Utente":
                 return func.HttpResponse("Utente non autorizzato a visualizzare questo ticket.", status_code=403)
 
             # Recupera tutte le risposte per il ticket

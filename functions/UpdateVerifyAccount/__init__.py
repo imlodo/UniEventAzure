@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 import pymongo
+from bson import ObjectId
 from pymongo import MongoClient
 import azure.functions as func
 import jwt
@@ -23,6 +24,11 @@ users_collection = db.Users
 # Setup del logger per l'Azure Function
 logging.basicConfig(level=logging.INFO)
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -94,7 +100,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             #Trova la richiesta di verifica
-            verify_request = user_verify_collection.find_one({"_id": pymongo.ObjectId(request_id)})
+            verify_request = user_verify_collection.find_one({"_id": ObjectId(request_id)})
 
             if not verify_request:
                 return func.HttpResponse(
@@ -106,7 +112,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if t_state == "refused":
                 update_fields = {
                     "status": t_state,
-                    "refused_date": datetime.now().date(),
+                    "refused_date": datetime.now().date().isoformat(),
                     "refused_motivation": t_motivation
                 }
             elif t_state == "verified":
@@ -125,10 +131,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
             # Esegui l'aggiornamento della richiesta
-            user_verify_collection.update_one({"_id": pymongo.ObjectId(request_id)}, {"$set": update_fields})
+            user_verify_collection.update_one({"_id": ObjectId(request_id)}, {"$set": update_fields})
 
             return func.HttpResponse(
-                json.dumps({"message": "Stato della richiesta aggiornato con successo."}),
+                json.dumps({"message": "Stato della richiesta aggiornato con successo."}, default=json_serial),
                 status_code=200,
                 mimetype="application/json"
             )
