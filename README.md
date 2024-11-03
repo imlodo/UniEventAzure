@@ -16,3 +16,5 @@ L'architettura utilizzerà il modello a tre livelli (Three-Tier Architecture). Q
 - Livello di Presentazione (Presentation Tier): gestito da Azure App Service, si occupa dell'interfaccia utente e della presentazione dei dati all'utente.
 - Livello di Logica di Business (Business Logic Tier): gestito da Azure Functions, il quale comunicherà con tutti gli altri servizi elencati precedentemente.
 - Livello dei Dati (Data Tier): gestito da Azure Blob Storage, il quale si occuperà della gestione dei dati persistenti (immagini) e da Azure Cosmos DB (con Mongo DB) per conservare i dati dei contenuti e degli utenti.
+
+<img src="https://github.com/imlodo/UniEventAzure/blob/main/Documentazione%20e%20Architettura/archietturaUniEventRework.jpg?raw=true">
